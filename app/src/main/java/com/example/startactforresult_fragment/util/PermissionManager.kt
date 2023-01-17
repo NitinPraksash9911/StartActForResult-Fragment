@@ -55,7 +55,6 @@ class PermissionManager private constructor(private val fragment: WeakReference<
         fragment.get()?.let { fragment ->
             when {
                 areAllPermissionsGranted(fragment) -> sendPositiveResult()
-                shouldShowPermissionRationale(fragment) -> displayRationale(fragment)
                 else -> requestPermissions()
             }
         }

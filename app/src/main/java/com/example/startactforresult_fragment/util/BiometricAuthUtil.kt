@@ -1,6 +1,7 @@
 package com.example.startactforresult_fragment.util
 
 import android.app.Activity
+import android.os.Build
 import android.util.Log
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.*
@@ -16,7 +17,7 @@ class BiometricAuthUtil(private val activity: Activity) {
 
     fun isBiometricAvailable(): Boolean {
         val biometricManager = BiometricManager.from(activity)
-        return when (biometricManager.canAuthenticate(BIOMETRIC_WEAK)) {
+        return when (biometricManager.canAuthenticate(BIOMETRIC_STRONG)) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
                 Log.d(TAG, "App can authenticate using biometrics.")
                 true
@@ -38,7 +39,7 @@ class BiometricAuthUtil(private val activity: Activity) {
         }
     }
 
-     fun createBiometricPrompt(): BiometricPrompt {
+    fun createBiometricPrompt(): BiometricPrompt {
         val executor = ContextCompat.getMainExecutor(activity)
 
         val callback = object : BiometricPrompt.AuthenticationCallback() {
@@ -67,17 +68,15 @@ class BiometricAuthUtil(private val activity: Activity) {
     }
 
     fun generatePromptInfo() =
-        try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             BiometricPrompt.PromptInfo.Builder().setTitle("Biometric login for Upswing")
                 .setSubtitle("Log in using your biometric credential")
                 .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
                 .build()
-        } catch (e: Exception) {
+        } else {
             BiometricPrompt.PromptInfo.Builder().setTitle("Biometric login for Upswing")
-                .setSubtitle("Log in using your biometric credential")
-                .setNegativeButtonText("cancel")
-                .setAllowedAuthenticators(DEVICE_CREDENTIAL)
+                .setSubtitle("Log in using your device lock")
+                .setDeviceCredentialAllowed(true)
                 .build()
         }
-
 }
