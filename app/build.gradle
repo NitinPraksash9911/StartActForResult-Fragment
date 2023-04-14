@@ -4,19 +4,23 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.example.startactforresult_fragment"
-        minSdk 21
-        targetSdk 32
+        minSdk 23
+        targetSdk 33
         versionCode 1
         versionName "1.0"
-
+        manifestPlaceholders["partnerUid"] = 'edhas'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -41,7 +45,10 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.browser:browser:1.4.0'
+    implementation 'androidx.webkit:webkit:1.4.0'
     testImplementation 'junit:junit:4.13.2'
+    implementation project(':teslibrary')
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
 
@@ -52,4 +59,12 @@ dependencies {
 
 
     implementation "androidx.biometric:biometric:1.1.0"
+    implementation("com.google.code.gson:gson:2.9.0")
+    implementation 'com.jakewharton.timber:timber:5.0.1'
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+
+    //security
+    implementation("androidx.security:security-crypto:1.0.0")
+
 }
+
