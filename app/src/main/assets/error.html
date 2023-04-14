@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Picker</title>
+    <style>
+        .image-preview {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            border: 1px solid black;
+            overflow: hidden;
+        }
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+<input type="file" accept="image/*" multiple onchange="previewImages(event)">
+<div id="preview"></div>
+
+<script>
+    function previewImages(event) {
+        const files = event.target.files;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const previewContainer = document.getElementById('preview');
+                const preview = document.createElement('div');
+                preview.className = 'image-preview';
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                preview.appendChild(img);
+                previewContainer.appendChild(preview);
+            }
+
+            reader.readAsDataURL(file);
+        }
+    }
+</script>
+</body>
+</html>

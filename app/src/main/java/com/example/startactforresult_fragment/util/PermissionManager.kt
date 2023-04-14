@@ -1,54 +1,41 @@
 package com.example.startactforresult_fragment.util
 
+import android.Manifest
 import android.Manifest.permission.READ_PHONE_STATE
 import android.Manifest.permission.SEND_SMS
-import android.content.DialogInterface
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.example.startactforresult_fragment.R
 import java.lang.ref.WeakReference
 
 class PermissionManager private constructor(private val fragment: WeakReference<Fragment>) {
 
     private val requiredPermissions = mutableListOf<Permission>()
-    private var rationale: String? = null
-    private var callback: (Boolean) -> Unit = {}
-    private var detailedCallback: (Map<Permission, Boolean>) -> Unit = {}
+    private var resultCallback: (PermissionStatus) -> Unit = {}
 
-    private val permissionCheck =
-        fragment.get()
-            ?.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grantResults ->
-                sendResultAndCleanUp(grantResults)
-            }
+    private val permissionCheck = fragment.get()
+        ?.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grantResults ->
+            sendResultAndCleanUp(grantResults)
+        }
 
     companion object {
         fun from(fragment: Fragment) = PermissionManager(WeakReference(fragment))
     }
 
-    fun rationale(description: String): PermissionManager {
-        rationale = description
-        return this
-    }
-
     fun request(vararg permission: Permission): PermissionManager {
         requiredPermissions.addAll(permission)
+        handlePermissionRequest()
         return this
     }
 
-    fun checkPermission(callback: (Boolean) -> Unit) {
-        this.callback = callback
-        handlePermissionRequest()
-    }
-
-    fun checkDetailedPermission(callback: (Map<Permission, Boolean>) -> Unit) {
-        this.detailedCallback = callback
-        handlePermissionRequest()
+    fun resultCallback(callback: (PermissionStatus) -> Unit = {}): PermissionManager {
+        this.resultCallback = callback
+        return this
     }
 
     private fun handlePermissionRequest() {
@@ -60,57 +47,40 @@ class PermissionManager private constructor(private val fragment: WeakReference<
         }
     }
 
-    fun handlePermissionDenied() {
+    private fun handlePermissionDenied() {
         fragment.get()?.let { fragment ->
             if (shouldShowPermissionRationale(fragment).not()) {
-                showPermissionExplanationDialog(fragment)
+                resultCallback.invoke(PermissionStatus.NEVER_ASK)
+            } else {
+                resultCallback.invoke(PermissionStatus.DENIED)
             }
         }
     }
 
-    private fun displayRationale(fragment: Fragment) {
-        AlertDialog.Builder(fragment.requireContext())
-            .setTitle(fragment.getString(R.string.dialog_permission_title))
-            .setMessage(rationale ?: fragment.getString(R.string.dialog_permission_default_message))
-            .setCancelable(false)
-            .setPositiveButton(fragment.getString(R.string.dialog_permission_button_positive)) { _, _ ->
-                requestPermissions()
-            }
-            .show()
+    fun allowPermissionsFromSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", fragment.get()?.context?.packageName ?: "", null)
+        }
+        fragment.get()?.startActivity(intent)
     }
 
-    private fun showPermissionExplanationDialog(fragment: Fragment) {
-        val builder = AlertDialog.Builder(fragment.requireContext())
-        builder.setTitle("Permission needed")
-        builder.setMessage("This permission is needed device authentication")
-        builder.setCancelable(false)
-        builder.setPositiveButton("Go to settings") { _: DialogInterface, _: Int ->
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.fromParts("package", fragment.activity?.packageName, null)
-            }
-            fragment.startActivity(intent)
-        }
-        builder.setNegativeButton("Cancel") { dialog: DialogInterface, _: Int ->
-            dialog.dismiss()
-        }
-        builder.show()
-    }
 
     private fun sendPositiveResult() {
         sendResultAndCleanUp(getPermissionList().associate { it to true })
     }
 
     private fun sendResultAndCleanUp(grantResults: Map<String, Boolean>) {
-        callback(grantResults.all { it.value })
-        detailedCallback(grantResults.mapKeys { Permission.from(it.key) })
+        if (grantResults.values.any { !it }) {
+            handlePermissionDenied()
+        } else {
+            resultCallback.invoke(PermissionStatus.GRANTED)
+        }
         cleanUp()
     }
 
     private fun cleanUp() {
         requiredPermissions.clear()
-        rationale = null
-        callback = {}
-        detailedCallback = {}
+        resultCallback = {}
     }
 
     private fun requestPermissions() {
@@ -123,9 +93,6 @@ class PermissionManager private constructor(private val fragment: WeakReference<
     private fun shouldShowPermissionRationale(fragment: Fragment) =
         requiredPermissions.any { it.requiresRationale(fragment) }
 
-    private fun hasDenied(fragment: Fragment) =
-        requiredPermissions.any { it.requiresRationale(fragment).not() }
-
     private fun getPermissionList() =
         requiredPermissions.flatMap { it.permissions.toList() }.toTypedArray()
 
@@ -137,8 +104,7 @@ class PermissionManager private constructor(private val fragment: WeakReference<
 
     private fun hasPermission(fragment: Fragment, permission: String) =
         ContextCompat.checkSelfPermission(
-            fragment.requireContext(),
-            permission
+            fragment.requireContext(), permission
         ) == PackageManager.PERMISSION_GRANTED
 
     fun hasReadPhoneStatePermission(): Boolean {
@@ -151,6 +117,18 @@ class PermissionManager private constructor(private val fragment: WeakReference<
         return fragment.get()?.let {
             hasPermission(it, SEND_SMS)
         } ?: false
+    }
+
+    fun hasReadAttachmentsPermission(): Boolean {
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            fragment.get()?.let {
+                hasPermission(it, Manifest.permission.READ_MEDIA_IMAGES)
+            } ?: false
+        } else {
+            fragment.get()?.let {
+                hasPermission(it, Manifest.permission.READ_EXTERNAL_STORAGE)
+            } ?: false
+        }
     }
 
 }

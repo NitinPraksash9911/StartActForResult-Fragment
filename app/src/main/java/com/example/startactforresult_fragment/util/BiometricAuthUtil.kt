@@ -1,10 +1,13 @@
 package com.example.startactforresult_fragment.util
 
 import android.app.Activity
+import android.app.KeyguardManager
+import android.content.Context
 import android.os.Build
-import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricManager.Authenticators.*
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -15,68 +18,119 @@ class BiometricAuthUtil(private val activity: Activity) {
         const val TAG = "authCallback"
     }
 
-    fun isBiometricAvailable(): Boolean {
+    private val launchPinOrPatternPrompt =
+        (activity as FragmentActivity).registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // User has successfully authenticated with PIN or pattern
+                onSuccess.invoke()
+            } else {
+                onError.invoke("Wrong Credential")
+            }
+        }
+
+    private val biometricPrompt: BiometricPrompt
+    private var onSuccess: () -> Unit = {}
+    private var onError: (String) -> Unit = {}
+
+    init {
+        biometricPrompt = generateBiometricPrompt()
+    }
+
+    private fun isBiometricAvailable(): Boolean {
         val biometricManager = BiometricManager.from(activity)
         return when (biometricManager.canAuthenticate(BIOMETRIC_STRONG)) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
-                Log.d(TAG, "App can authenticate using biometrics.")
+                showLog(TAG, "App can authenticate using biometrics.")
                 true
             }
 
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-                Log.e(TAG, "No Biometric sensor found on this device.")
+                showLog(TAG, "No Biometric sensor found on this device.")
                 false
             }
             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-                Log.e(TAG, "No Biometric senor is currently unavailable.")
+                showLog(TAG, "No Biometric senor is currently unavailable.")
                 false
             }
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                Log.e(TAG, "No Biometric credential enrolled on this device.")
+                showLog(TAG, "No Biometric credential enrolled on this device.")
                 false
             }
             else -> false
         }
     }
 
-    fun createBiometricPrompt(): BiometricPrompt {
-        val executor = ContextCompat.getMainExecutor(activity)
-
-        val callback = object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                super.onAuthenticationError(errorCode, errString)
-                Log.d(TAG, "$errorCode :: $errString")
-                if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-//                    loginWithPassword() // Because in this app, the negative button allows the user to enter an account password. This is completely optional and your app doesn’t have to do it.
-                }
-            }
-
-            override fun onAuthenticationFailed() {
-                super.onAuthenticationFailed()
-                Log.d(TAG, "Authentication failed for an unknown reason")
-            }
-
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                super.onAuthenticationSucceeded(result)
-                Log.d(TAG, "Authentication was successful")
-                // Proceed with viewing the private encrypted message.
-//                showEncryptedMessage(result.cryptoObject)
-            }
-        }
-
-        return BiometricPrompt(activity as FragmentActivity, executor, callback)
+    private fun isDeviceLockAvailable(): Boolean {
+        val keyguardManager = activity.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        return keyguardManager.isDeviceSecure
     }
 
-    fun generatePromptInfo() =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            BiometricPrompt.PromptInfo.Builder().setTitle("Biometric login for Upswing")
-                .setSubtitle("Log in using your biometric credential")
-                .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
-                .build()
+    fun authenticViaDeviceBiometricOrPin(onSuccess: () -> Unit, onError: (String) -> Unit) {
+        this.onError = onError
+        this.onSuccess = onSuccess
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && isBiometricAvailable()) {
+            // Authenticate via biometric if available
+            biometricPrompt.authenticate(generatePromptInfo())
+        } else if (isDeviceLockAvailable()) {
+            // Prompt for PIN or pattern if device lock is available
+            showPinOrPatternPrompt()
         } else {
-            BiometricPrompt.PromptInfo.Builder().setTitle("Biometric login for Upswing")
-                .setSubtitle("Log in using your device lock")
-                .setDeviceCredentialAllowed(true)
-                .build()
+            // Invoke onSuccess if neither biometric nor device lock is available
+            onSuccess.invoke()
         }
+    }
+
+    private fun showPinOrPatternPrompt() {
+        val keyguardManager =
+            activity.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        val intent = keyguardManager.createConfirmDeviceCredentialIntent(
+            "Authentication required",
+            "Please enter your PIN or pattern to continue"
+        )
+        launchPinOrPatternPrompt.launch(intent)
+    }
+
+
+
+    private fun generateBiometricPrompt(): BiometricPrompt {
+
+        return BiometricPrompt(activity as FragmentActivity,
+            ContextCompat.getMainExecutor(activity),
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationError(
+                    errorCode: Int, errString: CharSequence
+                ) {
+                    super.onAuthenticationError(errorCode, errString)
+                    showDebugToast(activity, "Authentication error: $errString")
+                    showLog(TAG, "Authentication error: $errString ")
+                    onError.invoke(errString.toString())
+                }
+
+                override fun onAuthenticationSucceeded(
+                    result: BiometricPrompt.AuthenticationResult
+                ) {
+                    super.onAuthenticationSucceeded(result)
+                    showDebugToast(activity, "Authentication succeeded!")
+                    showLog(TAG, "Authentication was successful")
+                    onSuccess.invoke()
+                }
+
+                override fun onAuthenticationFailed() {
+                    super.onAuthenticationFailed()
+                    showDebugToast(activity, "Authentication failed")
+                    showLog(TAG, "Authentication failed")
+                    onError.invoke("Authentication failed")
+                }
+            })
+
+    }
+
+    private fun generatePromptInfo(): BiometricPrompt.PromptInfo {
+        return BiometricPrompt.PromptInfo.Builder().setTitle("Biometric login")
+            .setSubtitle("Log in using your biometric credential")
+            .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
+            .build()
+    }
+
 }
