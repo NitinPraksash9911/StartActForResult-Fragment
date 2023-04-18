@@ -100,4 +100,4 @@ jobs:
           asset_name: app-release-signed-${{ steps.set_tag_output.outputs.tag }}.apk
           asset_content_type: application/vnd.android.package-archive
         env:
-          GITHUB_TOKEN: ${{ secrets
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
