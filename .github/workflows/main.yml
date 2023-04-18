@@ -44,10 +44,10 @@ jobs:
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: app/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.SIGNINGKEYBASE64 }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEYSTOREPASSWORD }}
-          keyPassword: ${{ secrets.KEYPASSWORD }}
+          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
+          alias: ${{ secrets.GIT_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
 
       - name: Make artifact
         uses: actions/upload-artifact@v2
