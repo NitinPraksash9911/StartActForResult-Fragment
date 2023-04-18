@@ -10,11 +10,11 @@ jobs:
     name: Build/Sign APK
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set tag output
         id: set_tag_output
-        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
 
       - name: Build APK
         id: build
@@ -63,5 +63,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{steps.sign_apk.outputs.signedReleaseFile}}
-          asset_name: app-release-signed-${{ steps.var.outputs.tag }}.apk
+          asset_name: app-release-signed-${{ steps.set_tag_output.outputs.tag }}.apk
           asset_content_type: application/zip
