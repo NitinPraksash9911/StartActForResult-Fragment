@@ -54,12 +54,12 @@ jobs:
           release_name: Release ${{ github.ref }}
           body: ${{ steps.changelog.outputs.changelog }} &#x20;
         env:
-          GITHUB_TOKEN: ${{ secrects.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload APK
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrects.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{steps.sign_apk.outputs.signedReleaseFile}}
