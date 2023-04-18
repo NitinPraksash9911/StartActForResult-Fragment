@@ -1,60 +1,94 @@
 name: Android CI
+
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
-  build-and-sign-apk:
-    name: Build and Sign APK
+  build:
+    name: Build/Sign APK
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Set tag output
         id: set_tag_output
-        run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+        run: echo "::set-output name=tag::${{ github.ref#refs/tags/ }}"
 
-      - name: Build Release APK
+      - name: Build APK
         id: build
         run: ./gradlew assembleRelease
 
-      - name: Sign Release APK
+      - name: Sign APK
         id: sign_apk
-        uses: victorbnl/build-signed-apk@main
+        uses: r0adkll/sign-android-release@v2
         with:
-          keystore_b64: ${{ secrets.GIT_JKS_FILE }}
-          key_alias: ${{ secrets.GIT_KEY_ALIAS }}
-          keystore_password: ${{ secrets.GIT_STORE_PASSWORD }}
-          key_password: ${{ secrets.GIT_KEY_PASSWORD }}
+          release-directory: app/build/outputs/apk/release
+          signing-key-base64: ${{ secrets.GIT_JKS_FILE }}
+          alias: ${{ secrets.GIT_KEY_ALIAS }}
+          store-password: ${{ secrets.GIT_STORE_PASSWORD }}
+          key-password: ${{ secrets.GIT_KEY_PASSWORD }}
 
-      - name: Make artifact
+      - name: Upload signed APK
         uses: actions/upload-artifact@v2
         with:
           name: app-release-signed
           path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
 
-      - name: Build Changelog
+      - name: Generate changelog
         id: changelog
-        uses: ardalanamini/auto-changelog@v3
+        uses: actions/github-script@v4
         with:
-          version: ${{ env.TAG_NAME }}
-          exclude-tags: 'rc*'
-          tag-pattern: 'v*'
-          remove-links: true
-          date-format: '%Y-%m-%d'
+          script: |
+            const autoChangelog = require('auto-changelog');
+            const fs = require('fs');
+            const path = require('path');
+            const packagePath = path.join(process.env.GITHUB_WORKSPACE, 'app/build/outputs/mapping/release/mapping.txt');
+            const packageData = fs.readFileSync(packagePath, 'utf8');
+            const changelog = autoChangelog({
+              template: fs.readFileSync(path.join(__dirname, 'template.hbs'), 'utf-8'),
+              release: '${{ github.ref }}',
+              commitLimit: 0,
+              tagPrefix: 'v',
+              includeMergeCommits: false,
+              showAuthor: false,
+              outputUnreleased: true,
+              gitRawCommitsOpts: {
+                from: '${{ github.event.before }}',
+                to: '${{ github.event.after }}',
+                format: '%B%n-hash-%n%H',
+              },
+              transform: (commit, context) => {
+                const hashIndex = commit.message.lastIndexOf('-hash-');
+                if (hashIndex !== -1) {
+                  commit.hash = commit.message.substr(hashIndex + 6);
+                  commit.message = commit.message.substr(0, hashIndex);
+                }
+                return commit;
+              },
+            });
+
+            fs.writeFileSync(packagePath, packageData);
+
+            console.log(changelog);
+
+            core.setOutput('changelog', changelog);
+
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: Release ${{ env.TAG_NAME }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: false
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ${{ steps.changelog.outputs.changelog }} &#x20;
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -63,7 +97,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
-          asset_name: app-release-signed-${{ env.TAG_NAME }}.apk
-          asset_content_type: application/zip
+          asset_name: app-release-signed-${{ steps.set_tag_output.outputs.tag }}.apk
+          asset_content_type: application/vnd.android.package-archive
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets
