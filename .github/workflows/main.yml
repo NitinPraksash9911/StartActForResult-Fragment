@@ -1,25 +1,20 @@
 name: Android CI
-
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
   pull_request:
-    branches:
-      - master
+    branches: [ master ]
 
 jobs:
-  build:
+  Build:
     name: Build/Sign APK
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set tag output
         id: set_tag_output
-        run: echo "::set-output name=tag::${{ github.ref#refs/tags/ }}"
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
 
       - name: Build APK
         id: build
@@ -27,60 +22,29 @@ jobs:
 
       - name: Sign APK
         id: sign_apk
-        uses: r0adkll/sign-android-release@v2
+        uses: r0adkll/sign-android-release@v1
         with:
-          release-directory: app/build/outputs/apk/release
-          signing-key-base64: ${{ secrets.GIT_JKS_FILE }}
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
           alias: ${{ secrets.GIT_KEY_ALIAS }}
-          store-password: ${{ secrets.GIT_STORE_PASSWORD }}
-          key-password: ${{ secrets.GIT_KEY_PASSWORD }}
+          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
 
-      - name: Upload signed APK
+      - name: Make artifact
         uses: actions/upload-artifact@v2
         with:
           name: app-release-signed
-          path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
+          path: ${{steps.sign_apk.outputs.signedReleaseFile}}
 
-      - name: Generate changelog
+
+      - name: Build Changelog
         id: changelog
-        uses: actions/github-script@v4
+        uses: ardalanamini/auto-changelog@v3
         with:
-          script: |
-            const autoChangelog = require('auto-changelog');
-            const fs = require('fs');
-            const path = require('path');
-            const packagePath = path.join(process.env.GITHUB_WORKSPACE, 'app/build/outputs/mapping/release/mapping.txt');
-            const packageData = fs.readFileSync(packagePath, 'utf8');
-            const changelog = autoChangelog({
-              template: fs.readFileSync(path.join(__dirname, 'template.hbs'), 'utf-8'),
-              release: '${{ github.ref }}',
-              commitLimit: 0,
-              tagPrefix: 'v',
-              includeMergeCommits: false,
-              showAuthor: false,
-              outputUnreleased: true,
-              gitRawCommitsOpts: {
-                from: '${{ github.event.before }}',
-                to: '${{ github.event.after }}',
-                format: '%B%n-hash-%n%H',
-              },
-              transform: (commit, context) => {
-                const hashIndex = commit.message.lastIndexOf('-hash-');
-                if (hashIndex !== -1) {
-                  commit.hash = commit.message.substr(hashIndex + 6);
-                  commit.message = commit.message.substr(0, hashIndex);
-                }
-                return commit;
-              },
-            });
-
-            fs.writeFileSync(packagePath, packageData);
-
-            console.log(changelog);
-
-            core.setOutput('changelog', changelog);
-
-          token: ${{ secrets.GITHUB_TOKEN }}
+          mention-authors: false
+          mention-new-contributors: false
+          include-compare: false
+          semver: false
 
       - name: Create Release
         id: create_release
@@ -94,10 +58,10 @@ jobs:
 
       - name: Upload APK
         uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
-          asset_name: app-release-signed-${{ steps.set_tag_output.outputs.tag }}.apk
-          asset_content_type: application/vnd.android.package-archive
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{steps.sign_apk.outputs.signedReleaseFile}}
+          asset_name: app-release-signed-${{ steps.set_tag_output.outputs.tag }}.apk
+          asset_content_type: application/zip
