@@ -6,6 +6,14 @@ plugins {
 android {
     compileSdk 33
 
+    signingConfigs {
+        release {
+            storeFile file('/Users/nitinprakash/app-signing.jks')
+            storePassword "ashul9911"
+            keyAlias "key9911"
+            keyPassword "ashul9911"
+        }
+    }
     defaultConfig {
         applicationId "com.example.startactforresult_fragment"
         minSdk 23
@@ -22,7 +30,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
