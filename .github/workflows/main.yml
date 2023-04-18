@@ -1,5 +1,4 @@
 name: Android CI
-
 on:
   push:
     branches: [ master ]
@@ -7,13 +6,11 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  Build:
     name: Build/Sign APK
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - name: Set tag output
         id: set_tag_output
@@ -33,11 +30,12 @@ jobs:
           keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
           keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
 
-      - name: Upload signed APK
+      - name: Make artifact
         uses: actions/upload-artifact@v2
         with:
           name: app-release-signed
-          path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
+          path: ${{steps.sign_apk.outputs.signedReleaseFile}}
+
 
       - name: Build Changelog
         id: changelog
@@ -56,14 +54,14 @@ jobs:
           release_name: Release ${{ github.ref }}
           body: ${{ steps.changelog.outputs.changelog }} &#x20;
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrects.GITHUB_TOKEN }}
 
       - name: Upload APK
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrects.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
-          asset_name: app-release-signed-${{ steps.set_tag_output.outputs.tag }}.apk
-          asset_content_type: application/vnd.android.package-archive
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          asset_path: ${{steps.sign_apk.outputs.signedReleaseFile}}
+          asset_name: app-release-signed-${{ steps.var.outputs.tag }}.apk
+          asset_content_type: application/zip
