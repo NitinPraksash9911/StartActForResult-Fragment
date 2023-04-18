@@ -25,7 +25,7 @@ jobs:
 
       - name: Sign APK
         id: sign_apk
-        uses: r0adkll/sign-android-release@v2
+        uses: r0adkll/sign-android-release@v1
         with:
           release-directory: app/build/outputs/apk/release
           signing-key-base64: ${{ secrets.GIT_JKS_FILE }}
