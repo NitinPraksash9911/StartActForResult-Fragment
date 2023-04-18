@@ -30,7 +30,7 @@ jobs:
 
       - name: Sign Release Artifact
         id: signArtifact
-        uses: r0adkll/sign-android-release@v1.0.1
+        uses: r0adkll/sign-android-release@v2.2.1
         with:
           releaseDirectory: app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
@@ -39,7 +39,7 @@ jobs:
           keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
 
       - name: Upload our APK
-        uses: actions/upload-artifact@v2.2.0
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: Release artifact
           path: app/build/outputs/apk/release/app-release.apk
