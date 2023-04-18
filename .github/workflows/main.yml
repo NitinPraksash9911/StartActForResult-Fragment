@@ -17,7 +17,7 @@ jobs:
 
       - name: Set tag output
         id: set_tag_output
-        run: echo "::set-output name=tag::${{ github.ref#refs/tags/ }}"
+        run: echo "::set-output name=tag::${GITHUB_REF#refs/*/}"
 
       - name: Build APK
         id: build
