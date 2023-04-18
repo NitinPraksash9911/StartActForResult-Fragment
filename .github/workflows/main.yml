@@ -31,7 +31,6 @@ jobs:
       - name:  Build Signed APK
         uses: victorbnl/build-signed-apk@main
         with:
-          releaseDirectory: app/build/outputs/apk/release
           keystore_b64: ${{ secrets.GIT_JKS_FILE }}
           key_alias: ${{ secrets.GIT_KEY_ALIAS }}
           keystore_password: ${{ secrets.GIT_STORE_PASSWORD }}
