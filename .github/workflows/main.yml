@@ -25,18 +25,17 @@ jobs:
       -  name: Run Tests
          run: ./gradlew test
          
-      -  name: Build Release Apk
-         run: ./gradlew assembleRelease
+#      -  name: Build Release Apk
+#         run: ./gradlew assembleRelease
 
-      - name: Sign Release Artifact
-        id: signArtifact
-        uses: r0adkll/sign-android-release@v2.2.1
+      - name:  Build Signed APK
+        uses: victorbnl/build-signed-apk@main
         with:
           releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
-          alias: ${{ secrets.GIT_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
+          keystore_b64: ${{ secrets.GIT_JKS_FILE }}
+          key_alias: ${{ secrets.GIT_KEY_ALIAS }}
+          keystore_password: ${{ secrets.GIT_STORE_PASSWORD }}
+          key_password: ${{ secrets.GIT_KEY_PASSWORD }}
 
       - name: Upload our APK
         uses: actions/upload-artifact@v3.1.1
