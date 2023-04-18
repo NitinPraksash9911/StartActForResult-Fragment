@@ -33,10 +33,6 @@
         <activity
             android:name=".SecondPartnerActivity"
             android:exported="false">
-            <intent-filter>
-                <action android:name="one.upswing.partner_action_${applicationId}_${partnerUid2}" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".PartnerImpSdkActivity"

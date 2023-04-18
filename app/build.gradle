@@ -8,10 +8,10 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('/Users/nitinprakash/app-signing.jks')
-            storePassword "ashul9911"
+            storeFile file('/Users/nitinprakash/result-start-activity-signing.jks')
+            storePassword "ashu9911"
             keyAlias "key9911"
-            keyPassword "ashul9911"
+            keyPassword "ashu9911"
         }
     }
     defaultConfig {
