@@ -39,45 +39,14 @@ jobs:
           name: app-release-signed
           path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
 
-      - name: Generate changelog
+      - name: Build Changelog
         id: changelog
-        uses: actions/github-script@v4
+        uses: ardalanamini/auto-changelog@v3
         with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const packagePath = path.join(process.env.GITHUB_WORKSPACE, 'app/build/outputs/mapping/release/mapping.txt');
-            const packageData = fs.readFileSync(packagePath, 'utf8');
-            const changelog = require('auto-changelog')({
-              template: fs.readFileSync(path.join(__dirname, 'template.hbs'), 'utf-8'),
-              release: '${{ github.ref }}',
-              commitLimit: 0,
-              tagPrefix: 'v',
-              includeMergeCommits: false,
-              showAuthor: false,
-              outputUnreleased: true,
-              gitRawCommitsOpts: {
-                from: '${{ github.event.before }}',
-                to: '${{ github.event.after }}',
-                format: '%B%n-hash-%n%H',
-              },
-              transform: (commit, context) => {
-                const hashIndex = commit.message.lastIndexOf('-hash-');
-                if (hashIndex !== -1) {
-                  commit.hash = commit.message.substr(hashIndex + 6);
-                  commit.message = commit.message.substr(0, hashIndex);
-                }
-                return commit;
-              },
-            });
-
-            fs.writeFileSync(packagePath, packageData);
-
-            console.log(changelog);
-
-            core.setOutput('changelog', changelog);
-
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          mention-authors: false
+          mention-new-contributors: false
+          include-compare: false
+          semver: false
 
       - name: Create Release
         id: create_release
