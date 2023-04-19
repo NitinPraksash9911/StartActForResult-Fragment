@@ -26,10 +26,6 @@ jobs:
           GIT_STORE_PASSWORD: ${{ secrets.GIT_STORE_PASSWORD }}
         run: ./gradlew assembleRelease
 
-      - name: Find APK file
-          run: |
-            apk_path=$(find . -name '*.apk' | head -n 1)
-            echo "APK file path: $apk_path"
 
       #      - name: Sign APK
       #        id: sign_apk
