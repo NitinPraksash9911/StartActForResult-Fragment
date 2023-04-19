@@ -39,8 +39,8 @@ jobs:
       - name: Make artifact
         uses: actions/upload-artifact@v2
         with:
-          name: app-release
-          path: app/build/outputs/apk/release
+          name: app-release-${{ env.ANDROID_VERSION_NAME }}.apk
+          path: app/build/outputs/apk/release/app-release-${{ env.ANDROID_VERSION_NAME }}.apk
 
 
       - name: Build Changelog
