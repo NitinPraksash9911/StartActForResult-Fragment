@@ -1,80 +1,73 @@
-name: Android CI
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  Recent working iml:             *******************************
 
-jobs:
-  build:
-    name: Build APK
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build APK
-        id: build
-        run: ./gradlew assembleRelease
-      - name: Make artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: app-release
-          path: app/build/outputs/apk/release/app-release.apk
 
-  sign:
-    name: Sign APK
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Sign APK
-        id: sign_apk
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: unsigned-apk
-          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
-          alias: ${{ secrets.GIT_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
-      - name: Make artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: app-release-signed
-          path: ${{steps.sign_apk.outputs.signedReleaseFile}}
 
-  release:
-    name: Release APK
-    runs-on: ubuntu-latest
-    needs: sign
-    steps:
-      - name: Build Changelog
-        id: changelog
-        uses: ardalanamini/auto-changelog@v3
-        with:
-          mention-authors: false
-          mention-new-contributors: false
-          include-compare: false
-          semver: false
+  name: Android CI
+  on:
+    push:
+      branches: [ master ]
+    pull_request:
+      branches: [ master ]
 
-      - name: Expose version name
-        uses: michpohl/android-expose-version-name-action@v1.0.0
-        with:
-          expose-version-name: 'true'
-          expose-version-code: 'true'
+  jobs:
+    Build:
+      name: Build/Sign APK
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        with:
-          tag_name: ${{ env.ANDROID_VERSION_NAME }}
-          release_name: Release ${{ env.ANDROID_VERSION_NAME }}
-          body: ${{ steps.changelog.outputs.changelog }} &#x20;
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload APK
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: signed-apk/app-release-signed.apk
-          asset_name: app-release-signed-${{ env.ANDROID_VERSION_NAME }}.apk
-          asset_content_type: application/zip
+        - name: Build APK
+          id: build
+          run: ./gradlew assembleRelease
+
+        - name: Sign APK
+          id: sign_apk
+          uses: r0adkll/sign-android-release@v1
+          with:
+            releaseDirectory: app/build/outputs/apk/release
+            signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
+            alias: ${{ secrets.GIT_KEY_ALIAS }}
+            keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
+            keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
+
+        - name: Make artifact
+          uses: actions/upload-artifact@v2
+          with:
+            name: app-release-signed
+            path: ${{steps.sign_apk.outputs.signedReleaseFile}}
+
+
+        - name: Build Changelog
+          id: changelog
+          uses: ardalanamini/auto-changelog@v3
+          with:
+            mention-authors: false
+            mention-new-contributors: false
+            include-compare: false
+            semver: false
+
+        - name: Expose version name
+          uses: michpohl/android-expose-version-name-action@v1.0.0
+          with:
+            expose-version-name: 'true'
+            expose-version-code: 'true'
+
+        - name: Create Release
+          id: create_release
+          uses: actions/create-release@v1
+          with:
+            tag_name: ${{ env.ANDROID_VERSION_NAME }}
+            release_name: Release ${{ env.ANDROID_VERSION_NAME }}
+            body: ${{ steps.changelog.outputs.changelog }} &#x20;
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Upload APK
+          uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ${{steps.sign_apk.outputs.signedReleaseFile}}
+            asset_name: app-release-signed-${{ env.ANDROID_VERSION_NAME }}.apk
+            asset_content_type: application/zip
