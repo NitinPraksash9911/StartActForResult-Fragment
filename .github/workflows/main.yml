@@ -18,18 +18,24 @@ jobs:
 
       - name: Decode Keystore
         env:
-          ENCODED_STRING: ${{ secrets.GIT_JKS_FILE }}
+          ENCODED_STRING: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+          SIGNING_KEY_STORE_PATH: ${{ secrets.SIGNING_KEY_STORE_PATH }}
+
         run: |
-          TMP_KEYSTORE_FILE_PATH="${RUNNER_TEMP}"/keystore
-          mkdir "${TMP_KEYSTORE_FILE_PATH}"
-          echo $ENCODED_STRING | base64 -d > "${TMP_KEYSTORE_FILE_PATH}"/keystore.jks
+          echo $ENCODED_STRING > keystore-b64.txt
+          base64 -d keystore-b64.txt > $SIGNING_KEY_STORE_PATH
 
 
-      - name: Build APK
-        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file="${TMP_KEYSTORE_FILE_PATH}/keystore.jks" -Pandroid.injected.signing.store.password=${{ secrets.GIT_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.GIT_KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.GIT_KEY_PASSWORD }}
+      - name: Build Release apk
+        env:
+          SIGNING_KEY_STORE_PATH: ${{ secrets.SIGNING_KEY_STORE_PATH }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+        run: ./gradlew assembleRelease
 
-      - name: Remove keystore file
-        run: rm "${TMP_KEYSTORE_FILE_PATH}"/keystore.jks
+#      - name: Remove keystore file
+#        run: rm "${TMP_KEYSTORE_FILE_PATH}"/keystore.jks
 
 
       #      - name: Sign APK

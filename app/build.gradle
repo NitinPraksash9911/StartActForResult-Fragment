@@ -6,22 +6,20 @@ plugins {
 android {
     compileSdk 33
 
-//    signingConfigs {
-//        release {
-//            release {
-//                storeFile file(project.property("KEYSTORE_FILE").toString())
-//                storePassword project.property("KEYSTORE_PASSWORD").toString()
-//                keyAlias project.property("SIGNING_KEY_ALIAS").toString()
-//                keyPassword project.property("SIGNING_KEY_PASSWORD").toString()
-//            }
-//        }
-//    }
+    signingConfigs {
+        release {
+            storeFile file("keystore.jks")
+            storePassword System.getenv("SIGNING_STORE_PASSWORD")
+            keyAlias System.getenv("SIGNING_KEY_ALIAS")
+            keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+        }
+    }
     defaultConfig {
         applicationId "com.example.startactforresult_fragment"
         minSdk 23
         targetSdk 33
-        versionCode 13
-        versionName "0.0.13"
+        versionCode 14
+        versionName "0.0.14"
         manifestPlaceholders["partnerUid"] = 'edhas'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -33,7 +31,7 @@ android {
         }
         release {
             minifyEnabled true
-//            signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
