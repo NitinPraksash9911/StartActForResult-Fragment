@@ -15,7 +15,6 @@ jobs:
       - name: Decode Keystore
         env:
           ENCODED_STRING: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
-        #          SIGNING_KEY_STORE_PATH: ${{ secrets.SIGNING_KEY_STORE_PATH }}
         run: |
           echo $ENCODED_STRING > keystore-b64.txt
           base64 -d keystore-b64.txt > app/keystore.jks
@@ -23,7 +22,6 @@ jobs:
 
       - name: Build Release apk
         env:
-          #          SIGNING_KEY_STORE_PATH: ${{ secrets.SIGNING_KEY_STORE_PATH }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
@@ -31,17 +29,6 @@ jobs:
 
       - name: Remove keystore file
         run: rm app/keystore.jks
-
-
-      #      - name: Sign APK
-      #        id: sign_apk
-      #        uses: r0adkll/sign-android-release@v1
-      #        with:
-      #          releaseDirectory: app/build/outputs/apk/release
-      #          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
-      #          alias: ${{ secrets.GIT_KEY_ALIAS }}
-      #          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
-      #          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
 
       - name: Make artifact
         uses: actions/upload-artifact@v3
@@ -62,14 +49,6 @@ jobs:
           name: app-release-signed
           path: app/build/outputs/apk/release
 
-      - name: Build Changelog
-        id: changelog
-        uses: ardalanamini/auto-changelog@v3
-        with:
-          mention-authors: false
-          mention-new-contributors: false
-          include-compare: false
-          semver: false
 
       - name: Expose version name
         uses: michpohl/android-expose-version-name-action@v1.0.0
@@ -86,13 +65,9 @@ jobs:
             app/build/outputs/apk/release/app-release.apk
           tag_name: ${{ env.ANDROID_VERSION_NAME }}
           name: Release ${{ env.ANDROID_VERSION_NAME }}
-#          body: ${{ steps.changelog.outputs.changelog }} &#x20;
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-      #      - name: List APKs
-      #        run: ls -R app/build/outputs/apk/release/
 
 #      - name: Upload APK
 #        uses: actions/upload-release-asset@v1
