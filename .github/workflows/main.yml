@@ -9,34 +9,39 @@ jobs:
   Build:
     name: Build/Sign APK
     runs-on: ubuntu-latest
-#     if: startsWith(github.ref, 'refs/tags/')
-
     steps:
       - uses: actions/checkout@v3
 
-#      - name: Build APK
-#        id: build
-#        run: ./gradlew assembleRelease
-
+      - name: Decode Keystore
+        env:
+          ENCODED_STRING: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+          SIGNING_KEY_STORE_PATH: ${{ secrets.SIGNING_KEY_STORE_PATH }}
+        run: |
+          echo $ENCODED_STRING > keystore-b64.txt
+          base64 -d keystore-b64.txt > app/keystore.jks
 
 
       - name: Build Release apk
         env:
-          GIT_JKS_FILE: ${{ secrets.GIT_JKS_FILE }}
-          GIT_KEY_ALIAS: ${{ secrets.GIT_KEY_ALIAS }}
-          GIT_KEY_PASSWORD: ${{ secrets.GIT_KEY_PASSWORD }}
-          GIT_STORE_PASSWORD: ${{ secrets.GIT_STORE_PASSWORD }}
+          #          SIGNING_KEY_STORE_PATH: ${{ secrets.SIGNING_KEY_STORE_PATH }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
         run: ./gradlew assembleRelease
 
-#      - name: Sign APK
-#        id: sign_apk
-#        uses: r0adkll/sign-android-release@v1
-#        with:
-#          releaseDirectory: app/build/outputs/apk/release
-#          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }} # base64 -i [Jks FilePath] | pbcopy, this used to generate the base64 for jsk file
-#          alias: ${{ secrets.GIT_KEY_ALIAS }}
-#          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
-#          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
+      - name: Remove keystore file
+        run: rm app/keystore.jks
+
+
+      #      - name: Sign APK
+      #        id: sign_apk
+      #        uses: r0adkll/sign-android-release@v1
+      #        with:
+      #          releaseDirectory: app/build/outputs/apk/release
+      #          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
+      #          alias: ${{ secrets.GIT_KEY_ALIAS }}
+      #          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
+      #          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
 
       - name: Make artifact
         uses: actions/upload-artifact@v2
@@ -44,6 +49,18 @@ jobs:
           name: app-release-signed
           path: app/build/outputs/apk/release
 
+  Release:
+    name: Create Release/Upload APK
+    needs: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: app-release-signed
+          path: app/build/outputs/apk/release
 
       - name: Build Changelog
         id: changelog
@@ -64,11 +81,14 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: v${{ env.ANDROID_VERSION_NAME }}
-          release_name: Release v${{ env.ANDROID_VERSION_NAME }}
+          tag_name: ${{ env.ANDROID_VERSION_NAME }}
+          release_name: Release ${{ env.ANDROID_VERSION_NAME }}
           body: ${{ steps.changelog.outputs.changelog }} &#x20;
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#      - name: List APKs
+#        run: ls -R app/build/outputs/apk/release/
 
       - name: Upload APK
         uses: actions/upload-release-asset@v1
@@ -76,6 +96,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: app/build/outputs/apk/release
+          asset_path: app/build/outputs/apk/release/app-release.apk
           asset_name: app-release-signed-${{ env.ANDROID_VERSION_NAME }}.apk
           asset_content_type: application/zip
