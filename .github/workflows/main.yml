@@ -26,7 +26,7 @@ jobs:
 
 
       - name: Build APK
-        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file= "${TMP_KEYSTORE_FILE_PATH}"/keystore.jks -Pandroid.injected.signing.store.password=${{ secrets.GIT_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.GIT_KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.GIT_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file="${TMP_KEYSTORE_FILE_PATH}/keystore.jks" -Pandroid.injected.signing.store.password=${{ secrets.GIT_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.GIT_KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.GIT_KEY_PASSWORD }}
 
       - name: Remove keystore file
         run: rm "${TMP_KEYSTORE_FILE_PATH}"/keystore.jks
