@@ -20,8 +20,8 @@ android {
         applicationId "com.example.startactforresult_fragment"
         minSdk 23
         targetSdk 33
-        versionCode 8
-        versionName "0.0.8"
+        versionCode 9
+        versionName "0.0.9"
         manifestPlaceholders["partnerUid"] = 'edhas'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
