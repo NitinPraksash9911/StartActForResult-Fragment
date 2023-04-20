@@ -1,9 +1,9 @@
 name: Android CI
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   Build:
@@ -30,13 +30,21 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: app-release-signed
-          path: ${{steps.sign_apk.outputs.signedReleaseFile}}
+          path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
 
   Release:
     name: Create Release/Upload APK
     needs: Build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: app-release-signed
+          path: app/build/outputs/apk/release
+
       - name: Build Changelog
         id: changelog
         uses: ardalanamini/auto-changelog@v3
@@ -46,18 +54,18 @@ jobs:
           include-compare: false
           semver: false
 
-#      - name: Expose version name
-#        uses: michpohl/android-expose-version-name-action@v1.0.0
-#        with:
-#          expose-version-name: 'true'
-#          expose-version-code: 'true'
+      - name: Expose version name
+        uses: michpohl/android-expose-version-name-action@v1.0.0
+        with:
+          expose-version-name: 'true'
+          expose-version-code: 'true'
 
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: 0.0.10
-          release_name: Release 0.0.10
+          tag_name: ${{ env.ANDROID_VERSION_NAME }}
+          release_name: Release ${{ env.ANDROID_VERSION_NAME }}
           body: ${{ steps.changelog.outputs.changelog }} &#x20;
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,6 +76,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{steps.sign_apk.outputs.signedReleaseFile}}
-          asset_name: app-release-signed-0.0.10.apk
+          asset_path: app/build/outputs/apk/release/app-release-signed.apk
+          asset_name: app-release-signed-${{ env.ANDROID_VERSION_NAME }}.apk
           asset_content_type: application/zip
