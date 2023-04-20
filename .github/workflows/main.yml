@@ -31,7 +31,6 @@ jobs:
         with:
           name: app-release-signed
           path: ${{steps.sign_apk.outputs.signedReleaseFile}}
-        needs: sign_apk
 
   Release:
     name: Create Release/Upload APK
