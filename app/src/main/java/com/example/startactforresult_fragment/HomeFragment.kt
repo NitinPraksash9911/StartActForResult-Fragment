@@ -91,7 +91,6 @@ class HomeFragment : Fragment() {
                 filePathCallback: ValueCallback<Array<Uri>>?,
                 fileChooserParams: FileChooserParams?
             ): Boolean {
-                // Open the gallery to select an image
                 launchImagePicker()
 
                 // Save the file upload callback for later use
