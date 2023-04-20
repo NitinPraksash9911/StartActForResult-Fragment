@@ -70,6 +70,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: List APKs
+        run: ls -R app/build/outputs/apk/release/
+
       - name: Upload APK
         uses: actions/upload-release-asset@v1
         env:
