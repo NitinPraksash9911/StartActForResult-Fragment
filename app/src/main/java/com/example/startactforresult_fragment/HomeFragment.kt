@@ -52,7 +52,6 @@ class HomeFragment : Fragment() {
 
     lateinit var permissionUtil: PermissionManager
     lateinit var smsUtil: SMSUtil
-//    lateinit var errorLayout:LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -74,8 +73,7 @@ class HomeFragment : Fragment() {
 
         smsUtil = SMSUtil(requireActivity())
 
-//        permission = PermissionManager.from(this)
-        //check if chrome is not installed in device
+
         binding.webview.isLongClickable = false
         permissionUtil = PermissionManager.from(this)
 
@@ -86,10 +84,6 @@ class HomeFragment : Fragment() {
 
         binding.webview.webViewClient = webClient
 
-//        val loaderAnimation =
-//            AnimatedVectorDrawableCompat.create(requireActivity(), R.drawable.loader_animation)
-//        binding.loaderImageView.setImageDrawable(loaderAnimation)
-//        loaderAnimation?.start()
 
         binding.webview.webChromeClient = object : WebChromeClient() {
             override fun onShowFileChooser(
@@ -118,7 +112,6 @@ class HomeFragment : Fragment() {
 
         binding.webview.loadUrl("https://www.workapps.com/web2/openChat/unsupported.html?source=https://www.workapps.com/openKYC/index.html?parentGrpId=4817914&guestGrpId=6374335&guestId=6319526&token=8cpWYkClRLuIUudhp9MM77GVUyXASP1nwGEztfu-4atGoTpPkf8aYVcwUqd88BcUadXBj0usZuWKqYCeMZ_c9lK5Kv6nFmjt02rFbxLJ_PyHOVTbIWqXSilAgusg9USGfY-5QHLfJwvFip_s4Bnoyldje4n3AelDEKqZkA3itko!1&orgId=6258&redirectUrl=https://webapp.alpha.stage-upswing.one/redirect/vkyc&orgId=6258&guestId=6319526&guestGrpId=6374335&cplink=1&orgId=6258&guestId=6319526&guestGrpId=6374335")
         binding.btn.setOnClickListener {
-//            launchImagePicker()
             val intentAction = "one.upswing.partner_action_${requireActivity().packageName}_edhas"
             startActivity(Intent(intentAction))
         }
