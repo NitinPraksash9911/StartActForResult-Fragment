@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         file = File(this.filesDir, "test.json")
         createSharedPref()
 
+
         findViewById<Button>(R.id.btn_save).setOnClickListener {
 //            saveICI("ICIQ9Q66Q8W868612")
             SdkInit.initSdk(context = this)
