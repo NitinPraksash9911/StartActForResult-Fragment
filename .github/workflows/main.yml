@@ -3,11 +3,11 @@ on:
   push:
     branches: [ master ]
     tags:
-      - '*'
+      - 'v*'
   pull_request:
     branches: [ master ]
     tags:
-      - '*'
+      - 'v*'
 
 
 jobs:
@@ -66,7 +66,7 @@ jobs:
       - name: Build Changelog
         uses: mikepenz/release-changelog-builder-action@v3
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Github Release
         uses: softprops/action-gh-release@v1
