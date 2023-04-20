@@ -12,25 +12,35 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build APK
-        id: build
-        run: ./gradlew assembleRelease
+#      - name: Build APK
+#        id: build
+#        run: ./gradlew assembleRelease
 
-      - name: Sign APK
-        id: sign_apk
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
-          alias: ${{ secrets.GIT_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
+      - name: Decode keystore
+        run: echo ${{ secrets.GIT_JKS_FILE }} | base64 --decode > keystore.jks
+
+      - name: Build APK
+        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=keystore.jks -Pandroid.injected.signing.store.password=${{ secrets.GIT_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.GIT_KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.GIT_KEY_PASSWORD }}
+
+      - name: Remove keystore file
+        run: rm keystore.jks
+               
+               
+#      - name: Sign APK
+#        id: sign_apk
+#        uses: r0adkll/sign-android-release@v1
+#        with:
+#          releaseDirectory: app/build/outputs/apk/release
+#          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
+#          alias: ${{ secrets.GIT_KEY_ALIAS }}
+#          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
+#          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
 
       - name: Make artifact
         uses: actions/upload-artifact@v2
         with:
           name: app-release-signed
-          path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
+          path: app/build/outputs/apk/release
 
   Release:
     name: Create Release/Upload APK
@@ -79,6 +89,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: app/build/outputs/apk/release/app-release-signed.apk
+          asset_path: app/build/outputs/apk/release/app-release.apk
           asset_name: app-release-signed-${{ env.ANDROID_VERSION_NAME }}.apk
           asset_content_type: application/zip
