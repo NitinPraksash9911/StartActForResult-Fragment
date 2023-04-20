@@ -1,9 +1,9 @@
 name: Android CI
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    branches: [master]
+    branches: [ master ]
 
 jobs:
   Build:
@@ -12,29 +12,34 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-#      - name: Build APK
-#        id: build
-#        run: ./gradlew assembleRelease
+      #      - name: Build APK
+      #        id: build
+      #        run: ./gradlew assembleRelease
 
-      - name: Decode keystore
-        run: echo ${{ secrets.GIT_JKS_FILE }} | base64 --decode > keystore.jks
+      - name: Decode Keystore
+          env:
+            ENCODED_STRING: ${{ secrets.GIT_JKS_FILE }}
+          run: |
+            TMP_KEYSTORE_FILE_PATH="${RUNNER_TEMP}"/keystore
+            mkdir "${TMP_KEYSTORE_FILE_PATH}"
+            echo $ENCODED_STRING | base64 -di > "${TMP_KEYSTORE_FILE_PATH}"/keystore.jks
 
       - name: Build APK
-        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=keystore.jks -Pandroid.injected.signing.store.password=${{ secrets.GIT_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.GIT_KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.GIT_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file= "${TMP_KEYSTORE_FILE_PATH}"/keystore.jks -Pandroid.injected.signing.store.password=${{ secrets.GIT_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.GIT_KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.GIT_KEY_PASSWORD }}
 
       - name: Remove keystore file
-        run: rm keystore.jks
-               
-               
-#      - name: Sign APK
-#        id: sign_apk
-#        uses: r0adkll/sign-android-release@v1
-#        with:
-#          releaseDirectory: app/build/outputs/apk/release
-#          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
-#          alias: ${{ secrets.GIT_KEY_ALIAS }}
-#          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
-#          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
+        run: rm "${TMP_KEYSTORE_FILE_PATH}"/keystore.jks
+
+
+      #      - name: Sign APK
+      #        id: sign_apk
+      #        uses: r0adkll/sign-android-release@v1
+      #        with:
+      #          releaseDirectory: app/build/outputs/apk/release
+      #          signingKeyBase64: ${{ secrets.GIT_JKS_FILE }}
+      #          alias: ${{ secrets.GIT_KEY_ALIAS }}
+      #          keyStorePassword: ${{ secrets.GIT_STORE_PASSWORD }}
+      #          keyPassword: ${{ secrets.GIT_KEY_PASSWORD }}
 
       - name: Make artifact
         uses: actions/upload-artifact@v2
