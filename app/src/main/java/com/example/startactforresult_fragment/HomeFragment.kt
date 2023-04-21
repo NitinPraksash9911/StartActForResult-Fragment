@@ -55,6 +55,8 @@ class HomeFragment : Fragment() {
     lateinit var permissionUtil: PermissionManager
     lateinit var smsUtil: SMSUtil
 
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
