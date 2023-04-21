@@ -1,6 +1,7 @@
 package com.example.startactforresult_fragment
 
 import android.content.ContentUris
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -36,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.File
 import java.io.IOException
 import java.util.concurrent.Executor
 
@@ -111,8 +113,9 @@ class HomeFragment : Fragment() {
 
         binding.webview.loadUrl("https://www.workapps.com/web2/openChat/unsupported.html?source=https://www.workapps.com/openKYC/index.html?parentGrpId=4817914&guestGrpId=6374335&guestId=6319526&token=8cpWYkClRLuIUudhp9MM77GVUyXASP1nwGEztfu-4atGoTpPkf8aYVcwUqd88BcUadXBj0usZuWKqYCeMZ_c9lK5Kv6nFmjt02rFbxLJ_PyHOVTbIWqXSilAgusg9USGfY-5QHLfJwvFip_s4Bnoyldje4n3AelDEKqZkA3itko!1&orgId=6258&redirectUrl=https://webapp.alpha.stage-upswing.one/redirect/vkyc&orgId=6258&guestId=6319526&guestGrpId=6374335&cplink=1&orgId=6258&guestId=6319526&guestGrpId=6374335")
         binding.btn.setOnClickListener {
-            val intentAction = "one.upswing.partner_action_${requireActivity().packageName}_edhas"
-            startActivity(Intent(intentAction))
+//            val intentAction = "one.upswing.partner_action_${requireActivity().packageName}_edhas"
+//            startActivity(Intent(intentAction))
+            requireActivity().deleteSharedPref()
         }
         binding.btn2.setOnClickListener {
             val intentAction = "one.upswing.partner_action_${requireActivity().packageName}_edhas2"
@@ -131,6 +134,15 @@ class HomeFragment : Fragment() {
 
         registerBackPressed()
 
+    }
+
+    private fun Context.deleteSharedPref() {
+        val dir = File("${this.filesDir.parent}/shared_prefs/")
+        dir.listFiles()?.forEach { file ->
+            if (file.name.endsWith(".xml") && file.nameWithoutExtension == "upswing_pref_storage") {
+                file.delete()
+            }
+        }
     }
 
 
