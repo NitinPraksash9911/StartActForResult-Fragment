@@ -74,7 +74,7 @@ jobs:
       - name: Get last commit message
         id: last_commit
         run: |
-          last_commit_message=$(git log -1 --pretty=format:%s)
+          last_commit_message=$(git log --no-merges -1 --pretty=format:%s)
           echo "last_commit_message=$last_commit_message" >> $GITHUB_ENV
 
       - name: Create Github Release
