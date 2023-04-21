@@ -289,7 +289,6 @@ class HomeFragment : Fragment() {
     fun loadFromUri(photoUri: Uri?): Bitmap? {
         var image: Bitmap? = null
         try {
-            // check version of Android on device
             image = if (Build.VERSION.SDK_INT > 27) {
                 // on newer versions of Android, use the new decodeBitmap method
                 val source: ImageDecoder.Source =
