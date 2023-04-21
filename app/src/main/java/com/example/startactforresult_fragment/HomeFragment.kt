@@ -275,7 +275,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // TODO this code for seamless showing all images
     private fun getImagesUsingMediaStoreApi() {
         lifecycleScope.launch {
             val images = loadPhotosFromExternalStorage()
