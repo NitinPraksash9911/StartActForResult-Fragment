@@ -1,15 +1,9 @@
 name: Android CI
 on:
-  push:
-    branches: [ master ]
-    tags:
-      - 'v*'
   pull_request:
     types:
       - opened
     branches: [ master ]
-    tags:
-      - 'v*'
 
 
 jobs:
@@ -26,8 +20,6 @@ jobs:
         run: |
           echo $ENCODED_STRING > keystore-b64.txt
           base64 -d keystore-b64.txt > app/keystore.jks
-
-
       - name: Build Release apk
         env:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
