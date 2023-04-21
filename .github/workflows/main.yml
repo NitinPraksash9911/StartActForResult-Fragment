@@ -3,7 +3,6 @@ on:
   pull_request:
     branches: [ master ]
 
-
 jobs:
   Build:
     name: Build/Sign APK
@@ -46,17 +45,24 @@ jobs:
           name: app-release-signed
           path: app/build/outputs/apk/release
 
-
       - name: Expose version name
         uses: michpohl/android-expose-version-name-action@v1.0.0
         with:
           expose-version-name: 'true'
           expose-version-code: 'true'
 
-      - name: Build Changelog
-        uses: mikepenz/release-changelog-builder-action@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate Changelog
+        id: generate_changelog
+        run: |
+          changelog=""
+          for commit in $(git log --format="%H" --reverse ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          do
+            COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s" $commit)
+            COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an" $commit)
+            COMMIT_DATE=$(git log -1 --pretty=format:"%ad" $commit)
+            changelog="$changelog\nCommit: $commit\nMessage: $COMMIT_MESSAGE\nAuthor: $COMMIT_AUTHOR\nDate: $COMMIT_DATE\n\n"
+          done
+          echo "::set-output name=changelog::$changelog"
 
       - name: Create Github Release
         uses: softprops/action-gh-release@v1
@@ -70,6 +76,7 @@ jobs:
           body: ${{ steps.generate_changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
 #      - name: Upload APK
