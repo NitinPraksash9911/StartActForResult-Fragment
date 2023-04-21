@@ -10,7 +10,7 @@ jobs:
   Build:
     name: Build/Sign APK
     runs-on: ubuntu-latest
-#    if: github.event.pull_request.opened == true
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v3
 
@@ -20,8 +20,6 @@ jobs:
         run: |
           echo $ENCODED_STRING > keystore-b64.txt
           base64 -d keystore-b64.txt > app/keystore.jks
-
-
       - name: Build Release apk
         env:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
@@ -42,8 +40,8 @@ jobs:
     name: Create Release/Upload APK
     needs: Build
     runs-on: ubuntu-latest
-#    if: github.event.pull_request.opened == true
-      steps:
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
       - uses: actions/checkout@v3
 
       - name: Download artifact
