@@ -130,6 +130,7 @@ class HomeFragment : Fragment() {
 
         binding.errorLayout.retryButton.setOnClickListener {
 
+
         }
 
         registerBackPressed()

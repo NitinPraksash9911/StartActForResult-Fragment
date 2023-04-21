@@ -1,9 +1,9 @@
 name: Android CI
 on:
-#  push:
-#    branches: [ master ]
-#    tags:
-#      - 'v*'
+  push:
+    branches: [ master ]
+    tags:
+      - 'v*'
   pull_request:
     types:
       - opened
