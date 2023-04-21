@@ -128,6 +128,7 @@ class HomeFragment : Fragment() {
             binding.btn.text = result
         }
 
+
         binding.errorLayout.retryButton.setOnClickListener {
 
         }
