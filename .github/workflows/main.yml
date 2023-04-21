@@ -51,31 +51,25 @@ jobs:
           expose-version-name: 'true'
           expose-version-code: 'true'
 
-      #      - name: Generate Changelog
-      #        id: generate_changelog
-      #        run: |
-      #          changelog=""
-      #          for commit in $(git log --format="%H" --reverse ${{ github.event.before }}..${{ github.event.after }})
-      #          do
-      #            COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s" $commit)
-      #            COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an" $commit)
-      #            COMMIT_DATE=$(git log -1 --pretty=format:"%ad" $commit)
-      #            changelog="$changelog\nCommit: $commit\nMessage: $COMMIT_MESSAGE\nAuthor: $COMMIT_AUTHOR\nDate: $COMMIT_DATE\n\n"
-      #          done
-      #          echo "::set-output name=changelog::$changelog"
-
-      - name: Install git-chglog
+      - name: Install github_changelog_generator
         run: |
-          curl -L https://github.com/git-chglog/git-chglog/releases/download/v0.15.0/git-chglog_0.15.0_linux_amd64.tar.gz -o git-chglog.tar.gz
-          tar -zxvf git-chglog.tar.gz
-          sudo mv git-chglog /usr/local/bin
+          sudo apt-get update
+          sudo apt-get install -y ruby-dev
+          sudo gem install github_changelog_generator
 
       - name: Generate Changelog
         id: generate_changelog
+        env:
+          ANDROID_VERSION_NAME: ${{ env.ANDROID_VERSION_NAME }}
         run: |
-          git-chglog --output CHANGELOG.md
-          changelog=$(cat CHANGELOG.md)
-          echo "changelog=$changelog" >> $GITHUB_ENV
+          PREVIOUS_ANDROID_VERSION_NAME=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -B1 "$ANDROID_VERSION_NAME" | tail -n1)
+          echo "Previous version: $PREVIOUS_ANDROID_VERSION_NAME"
+          mkdir -p build
+          github_changelog_generator \
+            --since-tag $PREVIOUS_ANDROID_VERSION_NAME \
+            --output build/changelog.md
+          changelog=$(cat build/changelog.md)
+          echo "::set-output name=changelog::$changelog"
 
       - name: Create Github Release
         uses: softprops/action-gh-release@v1
@@ -86,18 +80,6 @@ jobs:
             app/build/outputs/apk/release/app-release.apk
           tag_name: ${{ env.ANDROID_VERSION_NAME }}
           name: Release ${{ env.ANDROID_VERSION_NAME }}
-          body: ${{ env.changelog }}
+          body: ${{ steps.generate_changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-
-#      - name: Upload APK
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: app/build/outputs/apk/release/app-release.apk
-#          asset_name: app-release-signed-${{ env.ANDROID_VERSION_NAME }}.apk
-#          asset_content_type: application/zip
