@@ -278,7 +278,6 @@ class HomeFragment : Fragment() {
     // TODO this code for seamless showing all images
     private fun getImagesUsingMediaStoreApi() {
         lifecycleScope.launch {
-            //USE for your custom view for image list showing
             val images = loadPhotosFromExternalStorage()
             Toast.makeText(requireActivity(), "ss" + images.get(0).contentUri, Toast.LENGTH_SHORT)
                 .show()
