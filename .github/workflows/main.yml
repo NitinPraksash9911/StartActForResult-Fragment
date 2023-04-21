@@ -55,7 +55,7 @@ jobs:
         id: generate_changelog
         run: |
           changelog=""
-          for commit in $(git log --format="%H" --reverse ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          for commit in $(git log --format="%H" --reverse ${{ github.event.before }}..${{ github.event.after }})
           do
             COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s" $commit)
             COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an" $commit)
