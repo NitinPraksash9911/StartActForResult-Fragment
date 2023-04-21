@@ -205,7 +205,6 @@ class HomeFragment : Fragment() {
             val url = request?.url.toString()
             if (url.startsWith("https://sameeksha-portal-uat.axisbank.co.in")) {
                 Log.d(TAGSS, "sameeksha called in intercpet request")
-//                    setProxy()
             }
             return super.shouldInterceptRequest(view, request)
         }
