@@ -19,14 +19,17 @@ jobs:
       - name: Grant Permission to Execute Gradle
         run: chmod +x gradlew
 
-      - name: Build and Publish Test Library
-        run: |
-          echo "Starting to build and publish the test library..."
-          ./gradlew teslibrary:assembleRelease publish
-          echo "Successfully built and published the test library!"
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Build test library
+        run: ./gradlew teslibrary:assembleRelease
+
+      - name: Publish packages test library
         env:
           GIT_NAME_TEST: ${{ secrets.GIT_NAME_TEST }}
           GIT_TOKEN_TEST: ${{ secrets.GIT_TOKEN_TEST }}
+        run: ./gradlew publish
 
 
 
