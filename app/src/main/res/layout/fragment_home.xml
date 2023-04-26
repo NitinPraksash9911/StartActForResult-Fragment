@@ -24,15 +24,16 @@
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
     <Button
         android:id="@+id/btn"
-        android:layout_width="80dp"
+        android:layout_width="77dp"
         android:layout_height="80dp"
-        android:textColor="@color/black"
         android:layout_gravity="right"
         android:layout_marginTop="50dp"
         android:layout_marginEnd="30dp"
-        android:text="load p1"/>
+        android:text="load p1"
+        android:textColor="@color/black" />
 
     <Button
         android:id="@+id/btn2"

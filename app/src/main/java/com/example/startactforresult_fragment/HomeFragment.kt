@@ -115,9 +115,14 @@ class HomeFragment : Fragment() {
 
         binding.webview.loadUrl("https://www.workapps.com/web2/openChat/unsupported.html?source=https://www.workapps.com/openKYC/index.html?parentGrpId=4817914&guestGrpId=6374335&guestId=6319526&token=8cpWYkClRLuIUudhp9MM77GVUyXASP1nwGEztfu-4atGoTpPkf8aYVcwUqd88BcUadXBj0usZuWKqYCeMZ_c9lK5Kv6nFmjt02rFbxLJ_PyHOVTbIWqXSilAgusg9USGfY-5QHLfJwvFip_s4Bnoyldje4n3AelDEKqZkA3itko!1&orgId=6258&redirectUrl=https://webapp.alpha.stage-upswing.one/redirect/vkyc&orgId=6258&guestId=6319526&guestGrpId=6374335&cplink=1&orgId=6258&guestId=6319526&guestGrpId=6374335")
         binding.btn.setOnClickListener {
-            val intentAction = "one.upswing.partner_action_${requireActivity().packageName}_edhas"
-            startActivity(Intent(intentAction))
+
+            val deeplink = "upswing://test.sdk/uti"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deeplink))
+            startActivity(intent)
+//            val intentAction = "one.upswing.partner_action_${requireActivity().packageName}_edhas"
+//            startActivity(Intent(intentAction))
 //            requireActivity().deleteSharedPref()
+
         }
         binding.btn2.setOnClickListener {
             val intentAction = "one.upswing.partner_action_${requireActivity().packageName}_edhas2"
