@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'maven-publish'
 }
 
 android {
@@ -40,4 +41,31 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+publishing {
+    def commonProperties = [
+            groupId    : 'my-test',
+            version    : '0.0.2',
+            credentials: [username: System.getenv("GIT_NAME_TEST"), password: System.getenv("GIT_TOKEN_TEST")]
+    ]
+
+    repositories {
+        maven {
+            url = "https://maven.pkg.github.com/NitinPraksash9911/StartActForResult-Fragment"
+            credentials {
+                username = commonProperties.credentials.username
+                password = commonProperties.credentials.password
+            }
+        }
+    }
+    publications {
+        aar(MavenPublication) {
+            groupId commonProperties.groupId
+            artifactId 'test-library'
+            version commonProperties.version
+            artifact("$buildDir/outputs/aar/teslibrary-release.aar")
+        }
+
+    }
 }
