@@ -26,6 +26,7 @@ jobs:
         run: ./gradlew teslibrary:assembleRelease
 
       - name: Publish packages test library
+        if: github.event.pull_request.merged == true
         env:
           GIT_NAME_TEST: ${{ secrets.GIT_NAME_TEST }}
           GIT_TOKEN_TEST: ${{ secrets.GIT_TOKEN_TEST }}
