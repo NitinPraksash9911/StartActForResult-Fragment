@@ -7,6 +7,6 @@ object SdkInit {
 
     @JvmStatic
     fun initSdk(context: Context) {
-        Toast.makeText(context, "Android Library Toast", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Android Library Toast  nannananandnandda", Toast.LENGTH_SHORT).show()
     }
 }
