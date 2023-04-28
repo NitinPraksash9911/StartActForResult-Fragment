@@ -70,6 +70,6 @@ jobs:
           name: Release ${{ env.ANDROID_VERSION_NAME }}
           body: |
             # new changes have been made
-            # 'test'
+            # test new
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
