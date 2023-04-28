@@ -117,7 +117,7 @@ jobs:
           prerelease: false
           files: |
             app/build/outputs/apk/uatAcme/release/app-uat-acme-release.apk
-            app/build/outputs/apk/uatAcme/release/app-stage-acme-release.apk
+            app/build/outputs/apk/stageAcme/release/app-stage-acme-release.apk
           tag_name: ${{ env.ANDROID_VERSION_NAME }}
           name: Release ${{ env.ANDROID_VERSION_NAME }}
           body: |
