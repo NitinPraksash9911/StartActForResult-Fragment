@@ -1,14 +1,18 @@
 name: Android CI
 on:
-  push:
+  pull_request:
     branches: [ master ]
-    tags:
-      - 'v*'
+    types:
+      - closed
+#  push:
+#    branches: [ master ]
+#    tags:
+#      - 'v*'
 
 jobs:
   Build:
+    if: contains(github.ref, 'refs/tags/') && (github.event.pull_request.merged == true)
     name: Build/Sign APK
-    if: contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -36,8 +40,8 @@ jobs:
           path: app/build/outputs/apk/release
 
   Release:
+    if: contains(github.ref, 'refs/tags/') && (github.event.pull_request.merged == true)
     name: Create Release/Upload APK
-    if: contains(github.ref, 'refs/tags/')
     needs: Build
     runs-on: ubuntu-latest
     steps:
