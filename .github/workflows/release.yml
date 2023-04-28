@@ -1,0 +1,75 @@
+name: Android CI
+on:
+  push:
+    branches: [ master ]
+    tags:
+      - 'v*'
+
+jobs:
+  Build:
+    name: Build/Sign APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Decode Keystore
+        env:
+          ENCODED_STRING: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+        run: |
+          echo $ENCODED_STRING > keystore-b64.txt
+          base64 -d keystore-b64.txt > app/keystore.jks
+      - name: Build Release apk
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+        run: ./gradlew assembleRelease
+
+      - name: Remove keystore file
+        run: rm app/keystore.jks
+
+      - name: Make artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release-signed
+          path: app/build/outputs/apk/release
+
+  Release:
+    name: Create Release/Upload APK
+    needs: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: app-release-signed
+          path: app/build/outputs/apk/release
+
+      - name: Expose version name
+        uses: michpohl/android-expose-version-name-action@v1.0.0
+        with:
+          expose-version-name: 'true'
+          expose-version-code: 'true'
+
+      - name: Changelog
+        uses: Bullrich/generate-release-changelog@master
+        id: Changelog
+        env:
+          REPO: ${{ github.repository }}
+
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: false
+          prerelease: false
+          files: |
+            app/build/outputs/apk/release/app-release.apk
+          tag_name: ${{ env.ANDROID_VERSION_NAME }}
+          name: Release ${{ env.ANDROID_VERSION_NAME }}
+          body: |
+            # new changes have been made
+            # test new
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
