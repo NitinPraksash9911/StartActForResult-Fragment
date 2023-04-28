@@ -90,6 +90,15 @@ jobs:
             app/build/outputs/apk/stageAcme/release
             app/build/outputs/apk/uatAcme/release
 
+
+      - name: List downloaded APK files
+        run: |
+          FILES=$(find app/build/outputs/apk -type f -name "*.apk" -exec echo {} \;)
+          for file in $FILES; do
+            echo "Downloaded file: $file"
+          done
+
+
       - name: Expose version name
         uses: michpohl/android-expose-version-name-action@v1.0.0
         with:
