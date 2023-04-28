@@ -72,47 +72,47 @@ jobs:
           for file in "\${FILE_ARRAY[@]}"; do
             echo "Uploaded file: $file"
           done
-          
+  
 
-#  Release:
-#    if: (github.event.pull_request.merged == true)
-#    name: Create Release/Upload APK
-#    needs: Build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#
-#      - name: Download artifact
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: app-release-signed
-#          path: |
-#            app/build/outputs/apk/stageAcme/release
-#            app/build/outputs/apk/uatAcme/release
-#
-#      - name: Expose version name
-#        uses: michpohl/android-expose-version-name-action@v1.0.0
-#        with:
-#          expose-version-name: 'true'
-#          expose-version-code: 'true'
-#
-#      - name: Changelog
-#        uses: Bullrich/generate-release-changelog@master
-#        id: Changelog
-#        env:
-#          REPO: ${{ github.repository }}
-#
-#      - name: Create Github Release
-#        uses: softprops/action-gh-release@v1
-#        with:
-#          generate_release_notes: false
-#          prerelease: false
-#          files: |
-#            app/build/outputs/apk/stageAcme/release
-#            app/build/outputs/apk/uatAcme/release
-#          tag_name: ${{ env.ANDROID_VERSION_NAME }}
-#          name: Release ${{ env.ANDROID_VERSION_NAME }}
-#          body: |
-#            ${{ steps.Changelog.outputs.changelog }}
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  Release:
+    if: (github.event.pull_request.merged == true)
+    name: Create Release/Upload APK
+    needs: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: app-release-signed
+          path: |
+            app/build/outputs/apk/stageAcme/release
+            app/build/outputs/apk/uatAcme/release
+
+      - name: Expose version name
+        uses: michpohl/android-expose-version-name-action@v1.0.0
+        with:
+          expose-version-name: 'true'
+          expose-version-code: 'true'
+
+      - name: Changelog
+        uses: Bullrich/generate-release-changelog@master
+        id: Changelog
+        env:
+          REPO: ${{ github.repository }}
+
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: false
+          prerelease: false
+          files: |
+            app/build/outputs/apk/uatAcme/release/app-uat-acme-release.apk
+            app/build/outputs/apk/uatAcme/release/app-stage-acme-release.apk
+          tag_name: ${{ env.ANDROID_VERSION_NAME }}
+          name: Release ${{ env.ANDROID_VERSION_NAME }}
+          body: |
+            ${{ steps.Changelog.outputs.changelog }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
