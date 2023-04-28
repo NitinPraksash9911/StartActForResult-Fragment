@@ -89,7 +89,6 @@ jobs:
           tag_name: ${{ env.ANDROID_VERSION_NAME }}
           name: Release ${{ env.ANDROID_VERSION_NAME }}
           body: |
-            # new changes have been made
-            # test new
+            ${{ steps.Changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
