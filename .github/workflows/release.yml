@@ -8,6 +8,7 @@ on:
 jobs:
   Build:
     name: Build/Sign APK
+    if: contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -36,6 +37,7 @@ jobs:
 
   Release:
     name: Create Release/Upload APK
+    if: contains(github.ref, 'refs/tags/')
     needs: Build
     runs-on: ubuntu-latest
     steps:
