@@ -1,7 +1,9 @@
 name: Android CI
 on:
-  pull_request:
+  push:
     branches: [ master ]
+    tags:
+      - 'v*'
 
 jobs:
   Build:
@@ -51,31 +53,11 @@ jobs:
           expose-version-name: 'true'
           expose-version-code: 'true'
 
-      - name: Install github_changelog_generator
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ruby-dev
-          sudo gem install github_changelog_generator
-
-      #      - name: Generate Changelog
-      #        id: generate_changelog
-      #        env:
-      #          ANDROID_VERSION_NAME: ${{ env.ANDROID_VERSION_NAME }}
-      #        run: |
-      #          PREVIOUS_ANDROID_VERSION_NAME=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -B1 "$ANDROID_VERSION_NAME" | tail -n1)
-      #          echo "Previous version: $PREVIOUS_ANDROID_VERSION_NAME"
-      #          mkdir -p build
-      #          github_changelog_generator \
-      #            --since-tag $PREVIOUS_ANDROID_VERSION_NAME \
-      #            --output build/changelog.md
-      #          changelog=$(cat build/changelog.md)
-      #          echo "::set-output name=changelog::$changelog"
-
-      - name: Get last commit message
-        id: last_commit
-        run: |
-          last_commit_message=$(git log --no-merges -1 --pretty=format:%s)
-          echo "last_commit_message=$last_commit_message" >> $GITHUB_ENV
+      - name: Changelog
+        uses: Bullrich/generate-release-changelog@master
+        id: Changelog
+        env:
+          REPO: ${{ github.repository }}
 
       - name: Create Github Release
         uses: softprops/action-gh-release@v1
@@ -88,6 +70,6 @@ jobs:
           name: Release ${{ env.ANDROID_VERSION_NAME }}
           body: |
             # new changes have been made
-            ${{ env.last_commit_message }}
+            # 'test'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
