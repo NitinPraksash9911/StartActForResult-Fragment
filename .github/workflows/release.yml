@@ -87,8 +87,7 @@ jobs:
         with:
           name: app-release-signed
           path: |
-            app/build/outputs/apk/stageAcme/release
-            app/build/outputs/apk/uatAcme/release
+            app/build/outputs/apk
 
 
       - name: List downloaded APK files
