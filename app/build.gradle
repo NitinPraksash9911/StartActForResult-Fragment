@@ -46,6 +46,59 @@ android {
     buildFeatures{
         viewBinding true
     }
+
+    flavorDimensions "version" , "partner"
+    productFlavors {
+        stage {
+            dimension "version"
+            versionNameSuffix "-stage"
+            resValue "string", "app_name", "Sample Parter Stage"
+            buildConfigField("String", "CUSTOMER_PARTNER_BASE_URL", "\"https://partner.api.alpha.stage-upswing.one\"")
+        }
+        uat {
+            dimension "version"
+            versionNameSuffix "-uat"
+            resValue "string", "app_name", "Sample Partner Uat"
+            buildConfigField("String", "CUSTOMER_PARTNER_BASE_URL", "\"https://partner.api.uat-upswing.one\"")
+        }
+        acme {
+            dimension "partner"
+            buildConfigField("String", "PARTNER_NAME", "\"Acme Corp\"")
+            buildConfigField("String", "PARTNER_ID", "\"ACME\"")
+            buildConfigField("String", "LOGO", "\"acme_corp\"")
+            manifestPlaceholders["partnerUid"] = "ACME"
+            versionNameSuffix = "-acme"
+        }
+        clearTax {
+            dimension "partner"
+            buildConfigField("String", "PARTNER_NAME", "\"Clear Tax\"")
+            buildConfigField("String", "PARTNER_ID", "\"CLER\"")
+            buildConfigField("String", "LOGO", "\"clear_logo\"")
+            buildConfigField("String", "STAGE_JWT", "\"NA\"")
+            manifestPlaceholders["partnerUid"] = "CLER"
+            versionNameSuffix = "-clear-tax"
+        }
+        smallCase {
+            dimension "partner"
+            buildConfigField("String", "PARTNER_NAME", "\"Small Case\"")
+            buildConfigField("String", "PARTNER_ID", "\"SMLC\"")
+            buildConfigField("String", "LOGO", "\"small_case_logo\"")
+            buildConfigField("String", "STAGE_JWT", "\"NA\"")
+            manifestPlaceholders["partnerUid"] = "SMLC"
+            versionNameSuffix = "-small-case"
+        }
+
+        cred {
+            dimension "partner"
+            buildConfigField("String", "PARTNER_NAME", "\"Cred\"")
+            buildConfigField("String", "PARTNER_ID", "\"CRED\"")
+            buildConfigField("String", "LOGO", "\"cred_logo\"")
+            buildConfigField("String", "STAGE_JWT", "\"\"")
+            manifestPlaceholders["partnerUid"] = "CRED"
+            versionNameSuffix = "-cred"
+        }
+
+    }
 }
 
 dependencies {

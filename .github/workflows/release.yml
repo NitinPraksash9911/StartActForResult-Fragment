@@ -42,12 +42,14 @@ jobs:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: |
+          ./gradlew assembleStageAcmeRelease
+          ./gradlew assembleUatAcmeRelease
 
       - name: Remove keystore file
         run: rm app/keystore.jks
 
-      - name: Make artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: app-release-signed
@@ -85,7 +87,7 @@ jobs:
           generate_release_notes: false
           prerelease: false
           files: |
-            app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/apk/release/*.apk
           tag_name: ${{ env.ANDROID_VERSION_NAME }}
           name: Release ${{ env.ANDROID_VERSION_NAME }}
           body: |
