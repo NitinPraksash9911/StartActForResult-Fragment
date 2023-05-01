@@ -4,10 +4,6 @@ on:
     branches: [ master ]
     types:
       - closed
-#  push:
-#    branches: [ master ]
-#    tags:
-#      - 'v*'
 
 jobs:
   Build:
@@ -45,6 +41,9 @@ jobs:
         run: |
           ./gradlew assembleStageAcmeRelease
           ./gradlew assembleUatAcmeRelease
+          ./gradlew assembleUatClearTaxRelease
+          ./gradlew assembleUatCredRelease
+          ./gradlew assembleUatSmallCaseRelease
 
       - name: List APK files
         id: list_files
@@ -64,6 +63,9 @@ jobs:
           path: |
             app/build/outputs/apk/stageAcme/release
             app/build/outputs/apk/uatAcme/release
+            app/build/outputs/apk/uatClearTax/release
+            app/build/outputs/apk/uatCred/release
+            app/build/outputs/apk/uatSmallCase/release
 
       - name: Print uploaded file names
         run: |
@@ -116,8 +118,11 @@ jobs:
           generate_release_notes: false
           prerelease: false
           files: |
-            app/build/outputs/apk/uatAcme/release/app-uat-acme-release.apk
             app/build/outputs/apk/stageAcme/release/app-stage-acme-release.apk
+            app/build/outputs/apk/uatAcme/release/app-uat-acme-release.apk
+            app/build/outputs/apk/stageAcme/release/app-uat-clearTax-release.apk
+            app/build/outputs/apk/stageAcme/release/app-uat-cred-release.apk
+            app/build/outputs/apk/stageAcme/release/app-uat-smallCase-release.apk
           tag_name: ${{ env.ANDROID_VERSION_NAME }}
           name: Release ${{ env.ANDROID_VERSION_NAME }}
           body: |

@@ -3,23 +3,27 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+def keystorePropertiesFile = rootProject.file("local.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     compileSdk 33
 
     signingConfigs {
         release {
-            storeFile file("keystore.jks")
-            storePassword System.getenv("SIGNING_STORE_PASSWORD")
-            keyAlias System.getenv("SIGNING_KEY_ALIAS")
-            keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+            storeFile file(keystoreProperties['storeFile']) ?: file("keystore.jks")
+            keyAlias keystoreProperties['keyAlias'] ?: System.getenv('SIGNING_KEY_ALIAS')
+            keyPassword keystoreProperties['keyPassword'] ?: System.getenv('SIGNING_KEY_PASSWORD')
+            storePassword keystoreProperties['storePassword'] ?: System.getenv('SIGNING_STORE_PASSWORD')
         }
     }
     defaultConfig {
         applicationId "com.example.startactforresult_fragment"
         minSdk 23
         targetSdk 33
-        versionCode 41
-        versionName "0.0.41"
+        versionCode 42
+        versionName "0.0.42"
         manifestPlaceholders["partnerUid"] = 'edhas'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,11 +47,11 @@ android {
         jvmTarget = '1.8'
     }
 
-    buildFeatures{
+    buildFeatures {
         viewBinding true
     }
 
-    flavorDimensions "version" , "partner"
+    flavorDimensions "version", "partner"
     productFlavors {
         stage {
             dimension "version"
