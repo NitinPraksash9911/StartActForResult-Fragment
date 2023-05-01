@@ -12,10 +12,10 @@ android {
 
     signingConfigs {
         release {
-            storeFile file(keystoreProperties['storeFile']) ?: file("keystore.jks")
-            keyAlias keystoreProperties['keyAlias'] ?: System.getenv('SIGNING_KEY_ALIAS')
-            keyPassword keystoreProperties['keyPassword'] ?: System.getenv('SIGNING_KEY_PASSWORD')
-            storePassword keystoreProperties['storePassword'] ?: System.getenv('SIGNING_STORE_PASSWORD')
+            storeFile file("keystore.jks")
+            keyAlias System.getenv('SIGNING_KEY_ALIAS') ?: keystoreProperties['keyAlias']
+            keyPassword System.getenv('SIGNING_KEY_PASSWORD') ?: keystoreProperties['keyPassword']
+            storePassword System.getenv('SIGNING_STORE_PASSWORD') ?: keystoreProperties['storePassword']
         }
     }
     defaultConfig {
