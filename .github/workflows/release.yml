@@ -58,10 +58,7 @@ jobs:
         with:
           name: app-release-signed
           path: |
-            app/build/outputs/apk/prod/release
-            app/build/outputs/apk/stage/release
-            app/build/outputs/apk/uat/release
-            app/build/outputs/bundle/prodRelease
+            app/build/outputs
 
       - name: Print uploaded file names
         run: |
@@ -85,8 +82,7 @@ jobs:
         with:
           name: app-release-signed
           path: |
-            app/build/outputs/apk
-            app/build/outputs/bundle
+            app/build/outputs
       
 
       - name: List downloaded APK and AAB files
