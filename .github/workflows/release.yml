@@ -2,12 +2,12 @@ name: Android CI
 on:
   pull_request:
     branches: [ master ]
-    types:
-      - closed
+#    types:
+#      - closed
 
 jobs:
   Build:
-    if: (github.event.pull_request.merged == true)
+#    if: (github.event.pull_request.merged == true)
     name: Build/Sign APK
     runs-on: ubuntu-latest
     steps:
@@ -33,17 +33,14 @@ jobs:
           echo $ENCODED_STRING > keystore-b64.txt
           base64 -d keystore-b64.txt > app/keystore.jks
 
-      - name: Build Release apk
+      - name: Build Release apk and Bundle
         env:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
         run: |
-          ./gradlew assembleStageAcmeRelease
-          ./gradlew assembleUatAcmeRelease
-          ./gradlew assembleUatClearTaxRelease
-          ./gradlew assembleUatCredRelease
-          ./gradlew assembleUatSmallCaseRelease
+          ./gradlew assembleRelease
+          ./gradlew app:bundleProdRelease   
 
       - name: List APK files
         id: list_files
@@ -61,11 +58,10 @@ jobs:
         with:
           name: app-release-signed
           path: |
-            app/build/outputs/apk/stageAcme/release
-            app/build/outputs/apk/uatAcme/release
-            app/build/outputs/apk/uatClearTax/release
-            app/build/outputs/apk/uatCred/release
-            app/build/outputs/apk/uatSmallCase/release
+            app/build/outputs/apk/prod/release
+            app/build/outputs/apk/stage/release
+            app/build/outputs/apk/uat/release
+            app/build/outputs/bundle/prodRelease
 
       - name: Print uploaded file names
         run: |
@@ -77,7 +73,7 @@ jobs:
   
 
   Release:
-    if: (github.event.pull_request.merged == true)
+#    if: (github.event.pull_request.merged == true)
     name: Create Release/Upload APK
     needs: Build
     runs-on: ubuntu-latest
@@ -90,15 +86,16 @@ jobs:
           name: app-release-signed
           path: |
             app/build/outputs/apk
+            app/build/outputs/bundle
+      
 
-
-      - name: List downloaded APK files
+      - name: List downloaded APK and AAB files
         run: |
-          FILES=$(find app/build/outputs/apk -type f -name "*.apk" -exec echo {} \;)
+          FILES=$(find app/build/outputs -type f \( -name "*.apk" -o -name "*.aab" \) -exec echo {} \;)
           for file in $FILES; do
             echo "Downloaded file: $file"
-          done
-
+          done 
+      
 
       - name: Expose version name
         uses: michpohl/android-expose-version-name-action@v1.0.0
@@ -118,11 +115,10 @@ jobs:
           generate_release_notes: false
           prerelease: false
           files: |
-            app/build/outputs/apk/stageAcme/release/app-stage-acme-release.apk
-            app/build/outputs/apk/uatAcme/release/app-uat-acme-release.apk
-            app/build/outputs/apk/uatClearTax/release/app-uat-clearTax-release.apk
-            app/build/outputs/apk/uatCred/release/app-uat-cred-release.apk
-            app/build/outputs/apk/uatSmallCase/release/app-uat-smallCase-release.apk
+            app/build/outputs/apk/prod/release/app-stage-release.apk
+            app/build/outputs/apk/stage/release/app-prod-release.apk
+            app/build/outputs/apk/uat/release/app-uat-release.apk
+            app/build/outputs/bundle/prodRelease/app-prod-release.aab
           tag_name: ${{ env.ANDROID_VERSION_NAME }}
           name: Release ${{ env.ANDROID_VERSION_NAME }}
           body: |
