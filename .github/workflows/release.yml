@@ -111,8 +111,7 @@ jobs:
           generate_release_notes: false
           prerelease: false
           files: |
-            app/build/outputs/apk/prod/release/app-stage-release.apk
-            app/build/outputs/apk/stage/release/app-prod-release.apk
+            app/build/outputs/apk/stage/release/app-stage-release.apk
             app/build/outputs/apk/uat/release/app-uat-release.apk
             app/build/outputs/bundle/prodRelease/app-prod-release.aab
           tag_name: ${{ env.ANDROID_VERSION_NAME }}
