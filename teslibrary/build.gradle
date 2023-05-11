@@ -64,7 +64,7 @@ publishing {
             groupId commonProperties.groupId
             artifactId 'test-library'
             version commonProperties.version
-            artifact("teslibrary/build/outputs/aar/teslibrary-release.aar")
+            artifact("build/outputs/aar/teslibrary-release.aar")
         }
     }
 }
