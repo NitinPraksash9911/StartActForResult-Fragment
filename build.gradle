@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.sdk_version = '0.0.48'
+    ext.sdk_version_name = '0.0.48'
+    ext.sdk_version_code = 48
 }
 plugins {
     id 'com.android.application' version '7.2.1' apply false

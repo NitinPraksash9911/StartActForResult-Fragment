@@ -11,9 +11,9 @@ android {
     defaultConfig {
         minSdk 23
         targetSdk 33
-        versionCode 1
-        versionName "1.0"
-        buildConfigField("String", "SDK_VERSION", "\"$sdk_version\"")
+        versionCode rootProject.ext.sdk_version_code
+        versionName rootProject.ext.sdk_version_name
+        buildConfigField("String", "SDK_VERSION", "\"${rootProject.ext.sdk_version_name}\"")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -46,7 +46,7 @@ dependencies {
 publishing {
     def commonProperties = [
             groupId    : 'my-test',
-            version    : '0.0.6',
+            version    : rootProject.ext.sdk_version_code,
             credentials: [username: System.getenv("GIT_NAME_TEST"), password: System.getenv("GIT_TOKEN_TEST")]
     ]
 

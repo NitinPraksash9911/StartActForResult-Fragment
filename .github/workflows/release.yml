@@ -50,8 +50,8 @@ jobs:
           prerelease: false
           files: |
             app/build/outputs/aar/teslibrary-release.aar
-          tag_name: '0.0.6'
-          name: 'Release 0.0.6'
+          tag_name: ${{ env.ANDROID_VERSION_NAME }}
+          name: Release ${{ env.ANDROID_VERSION_NAME }}
           body: |
             ${{ steps.Changelog.outputs.changelog }}
         env:

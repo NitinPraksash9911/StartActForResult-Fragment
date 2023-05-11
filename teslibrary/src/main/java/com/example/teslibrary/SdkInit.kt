@@ -8,5 +8,7 @@ object SdkInit {
     @JvmStatic
     fun initSdk(context: Context) {
         Toast.makeText(context, "Helloo", Toast.LENGTH_SHORT).show()
+
+        BuildConfig.SDK_VERSION
     }
 }
