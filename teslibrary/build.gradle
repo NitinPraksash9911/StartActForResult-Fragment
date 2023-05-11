@@ -11,8 +11,6 @@ android {
     defaultConfig {
         minSdk 23
         targetSdk 33
-        versionCode rootProject.ext.sdk_version_code
-        versionName rootProject.ext.sdk_version_name
         buildConfigField("String", "SDK_VERSION", "\"${rootProject.ext.sdk_version_name}\"")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -68,7 +66,11 @@ publishing {
         }
     }
 }
-
+task extractSdkVersion {
+    doLast {
+        println rootProject.ext.sdk_version_name
+    }
+}
 
 //publishing {
 //    repositories {

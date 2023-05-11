@@ -31,11 +31,11 @@ jobs:
           GIT_TOKEN_TEST: ${{ secrets.GIT_TOKEN_TEST }}
         run: ./gradlew publish
 
-      - name: Expose version name
-        uses: michpohl/android-expose-version-name-action@v1.0.0
-        with:
-          expose-version-name: 'true'
-          expose-version-code: 'true'
+      - name: Extract SDK Version
+        run: |
+          sdk_version_code=$(./gradlew -q -b build.gradle extractSdkVersion)
+          echo "SDK Version Code: $sdk_version_code"
+          echo "SDK_VERSION=$sdk_version_code" >> $GITHUB_ENV
 
       - name: Changelog
         uses: Bullrich/generate-release-changelog@master
@@ -50,8 +50,8 @@ jobs:
           prerelease: false
           files: |
             teslibrary/build/outputs/aar/teslibrary-release.aar
-          tag_name: ${{ env.ANDROID_VERSION_NAME }}
-          name: Release ${{ env.ANDROID_VERSION_NAME }}
+          tag_name: ${{ env.SDK_VERSION }}
+          name: Release ${{ env.SDK_VERSION }}
           body: |
             ${{ steps.Changelog.outputs.changelog }}
         env:
