@@ -1,17 +1,13 @@
-name: Android CI
+name: Publish on Merge
 on:
   pull_request:
     branches: [ master ]
-#    types:
-#      - closed
 
 jobs:
-  Build:
-#    if: (github.event.pull_request.merged == true)
-    name: Build/Sign APK
+  Publish:
+    name: Publish packages test library
     runs-on: ubuntu-latest
     steps:
-
       - uses: actions/checkout@v3
 
       - name: Set up JDK 11
@@ -26,72 +22,14 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
-      - name: Decode Keystore
+      - name: Build test library
+        run: ./gradlew teslibrary:assembleRelease
+
+      - name: Publish packages test library
         env:
-          ENCODED_STRING: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
-        run: |
-          echo $ENCODED_STRING > keystore-b64.txt
-          base64 -d keystore-b64.txt > app/keystore.jks
-
-      - name: Build Release apk and Bundle
-        env:
-          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-        run: |
-          ./gradlew assembleRelease
-          ./gradlew app:bundleProdRelease   
-
-      - name: List APK files
-        id: list_files
-        run: |
-          FILES=$(find app/build/outputs/apk -type f -name "*.apk" -exec echo {} \; | tr '\n' ',')
-          echo "APK files: $FILES"
-          echo "::set-output name=files::$FILES"
-
-
-      - name: Remove keystore file
-        run: rm app/keystore.jks
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-release-signed
-          path: |
-            app/build/outputs
-
-      - name: Print uploaded file names
-        run: |
-          FILES="${{ steps.list_files.outputs.files }}"
-          IFS=',' read -ra FILE_ARRAY <<< "$FILES"
-          for file in "\${FILE_ARRAY[@]}"; do
-            echo "Uploaded file: $file"
-          done
-  
-
-  Release:
-#    if: (github.event.pull_request.merged == true)
-    name: Create Release/Upload APK
-    needs: Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: app-release-signed
-          path: |
-            app/build/outputs
-      
-
-      - name: List downloaded APK and AAB files
-        run: |
-          FILES=$(find app/build/outputs -type f \( -name "*.apk" -o -name "*.aab" \) -exec echo {} \;)
-          for file in $FILES; do
-            echo "Downloaded file: $file"
-          done 
-      
+          GIT_NAME_TEST: ${{ secrets.GIT_NAME_TEST }}
+          GIT_TOKEN_TEST: ${{ secrets.GIT_TOKEN_TEST }}
+        run: ./gradlew publish
 
       - name: Expose version name
         uses: michpohl/android-expose-version-name-action@v1.0.0
@@ -111,11 +49,9 @@ jobs:
           generate_release_notes: false
           prerelease: false
           files: |
-            app/build/outputs/apk/stage/release/app-stage-release.apk
-            app/build/outputs/apk/uat/release/app-uat-release.apk
-            app/build/outputs/bundle/prodRelease/app-prod-release.aab
-          tag_name: ${{ env.ANDROID_VERSION_NAME }}
-          name: Release ${{ env.ANDROID_VERSION_NAME }}
+            app/build/outputs/aar/teslibrary-release.aar
+          tag_name: '0.0.6'
+          name: 'Release 0.0.6'
           body: |
             ${{ steps.Changelog.outputs.changelog }}
         env:

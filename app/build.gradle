@@ -57,19 +57,19 @@ android {
         stage {
             dimension "version"
             versionNameSuffix "-stage"
-            resValue "string", "app_name", "Sample Parter Stage"
+            resValue "string", "app_name", "StartActivyt-stage"
             buildConfigField("String", "CUSTOMER_PARTNER_BASE_URL", "\"https://partner.api.alpha.stage-upswing.one\"")
         }
         uat {
             dimension "version"
             versionNameSuffix "-uat"
-            resValue "string", "app_name", "Sample Partner Uat"
+            resValue "string", "app_name", "StartActivyt-Uat"
             buildConfigField("String", "CUSTOMER_PARTNER_BASE_URL", "\"https://partner.api.uat-upswing.one\"")
         }
         prod {
             dimension "version"
-            versionNameSuffix "-uat"
-            resValue "string", "app_name", "Sample Partner Uat"
+            versionNameSuffix "-prod"
+            resValue "string", "app_name", "StartActivyt"
             buildConfigField("String", "CUSTOMER_PARTNER_BASE_URL", "\"https://partner.api.uat-upswing.one\"")
         }
 //        acme {
@@ -138,6 +138,10 @@ dependencies {
 
     //security
     implementation("androidx.security:security-crypto:1.0.0")
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
+
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
 
 }
 
