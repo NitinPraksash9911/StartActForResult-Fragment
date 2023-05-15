@@ -23,8 +23,8 @@ android {
         applicationId "com.example.startactforresult_fragment"
         minSdk 23
         targetSdk 33
-        versionCode 43
-        versionName "0.0.43"
+        versionCode 44
+        versionName "0.0.44"
         manifestPlaceholders["partnerUid"] = 'edhas'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -52,56 +52,62 @@ android {
         viewBinding true
     }
 
-    flavorDimensions "version", "partner"
+    flavorDimensions "version"
     productFlavors {
         stage {
             dimension "version"
             versionNameSuffix "-stage"
-            resValue "string", "app_name", "Sample Parter Stage"
+            resValue "string", "app_name", "StartActivyt-stage"
             buildConfigField("String", "CUSTOMER_PARTNER_BASE_URL", "\"https://partner.api.alpha.stage-upswing.one\"")
         }
         uat {
             dimension "version"
             versionNameSuffix "-uat"
-            resValue "string", "app_name", "Sample Partner Uat"
+            resValue "string", "app_name", "StartActivyt-Uat"
             buildConfigField("String", "CUSTOMER_PARTNER_BASE_URL", "\"https://partner.api.uat-upswing.one\"")
         }
-        acme {
-            dimension "partner"
-            buildConfigField("String", "PARTNER_NAME", "\"Acme Corp\"")
-            buildConfigField("String", "PARTNER_ID", "\"ACME\"")
-            buildConfigField("String", "LOGO", "\"acme_corp\"")
-            manifestPlaceholders["partnerUid"] = "ACME"
-            versionNameSuffix = "-acme"
+        prod {
+            dimension "version"
+            versionNameSuffix "-prod"
+            resValue "string", "app_name", "StartActivyt"
+            buildConfigField("String", "CUSTOMER_PARTNER_BASE_URL", "\"https://partner.api.uat-upswing.one\"")
         }
-        clearTax {
-            dimension "partner"
-            buildConfigField("String", "PARTNER_NAME", "\"Clear Tax\"")
-            buildConfigField("String", "PARTNER_ID", "\"CLER\"")
-            buildConfigField("String", "LOGO", "\"clear_logo\"")
-            buildConfigField("String", "STAGE_JWT", "\"NA\"")
-            manifestPlaceholders["partnerUid"] = "CLER"
-            versionNameSuffix = "-clear-tax"
-        }
-        smallCase {
-            dimension "partner"
-            buildConfigField("String", "PARTNER_NAME", "\"Small Case\"")
-            buildConfigField("String", "PARTNER_ID", "\"SMLC\"")
-            buildConfigField("String", "LOGO", "\"small_case_logo\"")
-            buildConfigField("String", "STAGE_JWT", "\"NA\"")
-            manifestPlaceholders["partnerUid"] = "SMLC"
-            versionNameSuffix = "-small-case"
-        }
-
-        cred {
-            dimension "partner"
-            buildConfigField("String", "PARTNER_NAME", "\"Cred\"")
-            buildConfigField("String", "PARTNER_ID", "\"CRED\"")
-            buildConfigField("String", "LOGO", "\"cred_logo\"")
-            buildConfigField("String", "STAGE_JWT", "\"\"")
-            manifestPlaceholders["partnerUid"] = "CRED"
-            versionNameSuffix = "-cred"
-        }
+//        acme {
+//            dimension "partner"
+//            buildConfigField("String", "PARTNER_NAME", "\"Acme Corp\"")
+//            buildConfigField("String", "PARTNER_ID", "\"ACME\"")
+//            buildConfigField("String", "LOGO", "\"acme_corp\"")
+//            manifestPlaceholders["partnerUid"] = "ACME"
+//            versionNameSuffix = "-acme"
+//        }
+//        clearTax {
+//            dimension "partner"
+//            buildConfigField("String", "PARTNER_NAME", "\"Clear Tax\"")
+//            buildConfigField("String", "PARTNER_ID", "\"CLER\"")
+//            buildConfigField("String", "LOGO", "\"clear_logo\"")
+//            buildConfigField("String", "STAGE_JWT", "\"NA\"")
+//            manifestPlaceholders["partnerUid"] = "CLER"
+//            versionNameSuffix = "-clear-tax"
+//        }
+//        smallCase {
+//            dimension "partner"
+//            buildConfigField("String", "PARTNER_NAME", "\"Small Case\"")
+//            buildConfigField("String", "PARTNER_ID", "\"SMLC\"")
+//            buildConfigField("String", "LOGO", "\"small_case_logo\"")
+//            buildConfigField("String", "STAGE_JWT", "\"NA\"")
+//            manifestPlaceholders["partnerUid"] = "SMLC"
+//            versionNameSuffix = "-small-case"
+//        }
+//
+//        cred {
+//            dimension "partner"
+//            buildConfigField("String", "PARTNER_NAME", "\"Cred\"")
+//            buildConfigField("String", "PARTNER_ID", "\"CRED\"")
+//            buildConfigField("String", "LOGO", "\"cred_logo\"")
+//            buildConfigField("String", "STAGE_JWT", "\"\"")
+//            manifestPlaceholders["partnerUid"] = "CRED"
+//            versionNameSuffix = "-cred"
+//        }
 
     }
 }
@@ -132,6 +138,10 @@ dependencies {
 
     //security
     implementation("androidx.security:security-crypto:1.0.0")
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
+
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
 
 }
 

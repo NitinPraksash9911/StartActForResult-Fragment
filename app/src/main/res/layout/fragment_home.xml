@@ -8,15 +8,15 @@
     tools:context=".HomeFragment">
 
 
-    <TextView
-        android:id="@+id/tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
-        android:text="No Result"
-        android:textSize="20dp"
-        android:visibility="gone" />
+<!--    <TextView-->
+<!--        android:id="@+id/tv"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="center_horizontal"-->
+<!--        android:layout_marginTop="30dp"-->
+<!--        android:text="No Result"-->
+<!--        android:textSize="20dp"-->
+<!--        android:visibility="gone" />-->
 
 
     <WebView
@@ -44,25 +44,25 @@
         android:layout_marginEnd="30dp"
         android:text="load p2"/>
 
-    <ImageView
-        android:id="@+id/image"
-        android:layout_width="100dp"
+<!--    <ImageView-->
+<!--        android:id="@+id/image"-->
+<!--        android:layout_width="100dp"-->
 
-        android:layout_height="100dp"/>
+<!--        android:layout_height="100dp"/>-->
 
-    <include
-        android:id="@+id/error_layout"
-        layout="@layout/web_error_layout"
-        android:visibility="gone" />
+<!--    <include-->
+<!--        android:id="@+id/error_layout"-->
+<!--        layout="@layout/web_error_layout"-->
+<!--        android:visibility="gone" />-->
 
-    <TextView
-        android:id="@+id/txt"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+<!--    <TextView-->
+<!--        android:id="@+id/txt"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"/>-->
 
-    <ProgressBar
-        style="@style/CustomLoaderStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"/>
+<!--    <ProgressBar-->
+<!--        style="@style/CustomLoaderStyle"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:indeterminate="true"/>-->
 </FrameLayout>

@@ -10,13 +10,8 @@
         android:name="com.example.startactforresult_fragment.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" >
-        <action
-            android:id="@+id/action_homeFragment_to_secondFragment"
-            app:destination="@id/secondFragment" />
+<!--        <action-->
+<!--            android:id="@+id/action_homeFragment_to_secondFragment"-->
+<!--            app:destination="@id/secondFragment" />-->
     </fragment>
-    <fragment
-        android:id="@+id/secondFragment"
-        android:name="com.example.startactforresult_fragment.SecondFragment"
-        android:label="fragment_second"
-        tools:layout="@layout/fragment_second" />
 </navigation>
