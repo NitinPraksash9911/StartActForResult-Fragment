@@ -40,30 +40,34 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
-
+ext.enablePublishing = System.getenv().containsKey("GITHUB_ACTIONS")
 publishing {
-    def commonProperties = [
-            groupId    : 'my-test',
-            version    : rootProject.ext.sdk_version_code,
-            credentials: [username: System.getenv("GIT_NAME_TEST"), password: System.getenv("GIT_TOKEN_TEST")]
-    ]
+    if (enablePublishing) {
+        def commonProperties = [
+                groupId    : 'my-test',
+                version    : rootProject.ext.sdk_version_code,
+                credentials: [username: System.getenv("GIT_NAME_TEST"), password: System.getenv("GIT_TOKEN_TEST")]
+        ]
 
-    repositories {
-        maven {
-            url = "https://maven.pkg.github.com/NitinPraksash9911/StartActForResult-Fragment"
-            credentials {
-                username = commonProperties.credentials.username
-                password = commonProperties.credentials.password
+        repositories {
+            maven {
+                url = "https://maven.pkg.github.com/NitinPraksash9911/StartActForResult-Fragment"
+                credentials {
+                    username = commonProperties.credentials.username
+                    password = commonProperties.credentials.password
+                }
             }
         }
-    }
-    publications {
-        aar(MavenPublication) {
-            groupId commonProperties.groupId
-            artifactId 'test-library'
-            version commonProperties.version
-            artifact("build/outputs/aar/teslibrary-release.aar")
+        publications {
+            aar(MavenPublication) {
+                groupId commonProperties.groupId
+                artifactId 'test-library'
+                version commonProperties.version
+                artifact("build/outputs/aar/teslibrary-release.aar")
+            }
         }
+    } else {
+        println("\u001B[31mLocal publish is disabled.\u001B[0m")
     }
 }
 task extractSdkVersion {
