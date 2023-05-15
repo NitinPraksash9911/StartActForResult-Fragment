@@ -3,7 +3,6 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'maven-publish'
 }
-apply from: '../publish.gradle'
 
 android {
     namespace 'com.example.teslibrary'
@@ -41,3 +40,62 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
+ext.enablePublishing = System.getenv().containsKey("GITHUB_ACTIONS")
+publishing {
+    if (enablePublishing) {
+        def commonProperties = [
+                groupId    : 'my-test',
+                version    : rootProject.ext.sdk_version_code,
+                credentials: [username: System.getenv("GIT_NAME_TEST"), password: System.getenv("GIT_TOKEN_TEST")]
+        ]
+
+        repositories {
+            maven {
+                url = "https://maven.pkg.github.com/NitinPraksash9911/StartActForResult-Fragment"
+                credentials {
+                    username = commonProperties.credentials.username
+                    password = commonProperties.credentials.password
+                }
+            }
+        }
+        publications {
+            aar(MavenPublication) {
+                groupId commonProperties.groupId
+                artifactId 'test-library'
+                version commonProperties.version
+                artifact("build/outputs/aar/teslibrary-release.aar")
+            }
+        }
+    } else {
+        println("\u001B[31mLocal publish is disabled.\u001B[0m")
+    }
+}
+task extractSdkVersion {
+    doLast {
+        println rootProject.ext.sdk_version_name
+    }
+}
+
+//publishing {
+//    repositories {
+//        maven {
+//            url = "https://sdktest21.jfrog.io/artifactory/test1-11/"
+//            credentials {
+//                username = 'nitin@upswing.one'
+//                password = 'cmVmdGtuOjAxOjE3MTQ4MDU5NjQ6OXNKN2RMaGxoRE9jTWJGRG9EYVhvdVUxcTR2'
+//            }
+//        }
+//    }
+//    publications {
+//        aar(MavenPublication) {
+//            groupId = 'my-test'
+//            artifactId = 'test-library'
+//            version = '0.0.1'
+//            artifact("$buildDir/outputs/aar/teslibrary-release.aar")
+//        }
+//    }
+//
+//    artifactoryPublish {
+//        publications(publishing.publications.aar)
+//    }
+//}
